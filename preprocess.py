@@ -31,7 +31,7 @@ CROP_LEFT   = 0.10   # remove left 0%
 CROP_RIGHT  = 0.00   # remove right 10%
 
 # Downsampling — random sample to this many points (0 = keep all)
-TARGET_POINTS = 65000
+TARGET_POINTS = 0
 
 # Path subsampling — keep every Nth pixel from measurement paths
 PATH_SUBSAMPLE = 2

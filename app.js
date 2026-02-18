@@ -131,7 +131,16 @@ function initHeroAnimations() {
       .to('.hero-sub', { opacity: 1, y: 0, duration: 0.8 }, '-=0.5')
       .to('.hero-stats-row', { opacity: 1, y: 0, duration: 0.8 }, '-=0.4')
       .to('.hero-cta', { opacity: 1, y: 0, duration: 0.8 }, '-=0.4')
-      .to('.hero-scroll', { opacity: 1, duration: 0.8 }, '-=0.3');
+      .to('.hero-scroll', { opacity: 1, duration: 0.8 }, '-=0.3')
+      .call(() => initTypingEffect(), null, '-=0.3')
+      .fromTo('.hero-logo-visual', { opacity: 0, scale: 0.85, x: 40 },
+          { opacity: 1, scale: 1, x: 0, duration: 1.4, ease: 'power3.out' }, '-=1');
+
+    // Draw logo strokes
+    tl.fromTo('.logo-face, .logo-hex', { strokeDashoffset: 2000 },
+        { strokeDashoffset: 0, duration: 2, stagger: 0.2, ease: 'power2.inOut' }, '-=1.2');
+    tl.fromTo('.logo-text path', { strokeDashoffset: 800 },
+        { strokeDashoffset: 0, duration: 1.5, stagger: 0.1, ease: 'power2.inOut' }, '-=1.5');
 
     // Animate hero stat counters
     setTimeout(() => {
@@ -139,6 +148,50 @@ function initHeroAnimations() {
             animateCounter(el, parseInt(el.dataset.count), 1500);
         });
     }, 800);
+}
+
+// ==================== TYPING EFFECT ====================
+function initTypingEffect() {
+    const el = document.getElementById('typingWord');
+    if (!el) return;
+    const words = ['Perfectly.', 'Obsessively.', 'Without Blinking.', 'Like a Hawk.', 'At Machine Speed.', 'No Coffee Needed.'];
+    let wordIndex = 0;
+    let charIndex = words[0].length;
+    let isDeleting = false;
+    const typeSpeed = 80;
+    const deleteSpeed = 50;
+    const pauseAfterType = 2200;
+    const pauseAfterDelete = 400;
+
+    function tick() {
+        const currentWord = words[wordIndex];
+        if (!isDeleting) {
+            charIndex++;
+            el.textContent = currentWord.substring(0, charIndex);
+            if (charIndex === currentWord.length) {
+                isDeleting = true;
+                setTimeout(tick, pauseAfterType);
+                return;
+            }
+            setTimeout(tick, typeSpeed);
+        } else {
+            charIndex--;
+            el.textContent = currentWord.substring(0, charIndex);
+            if (charIndex === 0) {
+                isDeleting = false;
+                wordIndex = (wordIndex + 1) % words.length;
+                setTimeout(tick, pauseAfterDelete);
+                return;
+            }
+            setTimeout(tick, deleteSpeed);
+        }
+    }
+
+    // Start deleting after first pause
+    setTimeout(() => {
+        isDeleting = true;
+        tick();
+    }, pauseAfterType);
 }
 
 // ==================== SCROLL ANIMATIONS ====================
@@ -172,6 +225,34 @@ function initScrollAnimations() {
         },
         opacity: 0,
         y: -100,
+    });
+
+    // Future timeline items — staggered reveal
+    gsap.utils.toArray('.future-item').forEach((item, i) => {
+        gsap.fromTo(item, { opacity: 0, y: 40, x: -20 }, {
+            scrollTrigger: {
+                trigger: item,
+                start: 'top 90%',
+                toggleActions: 'play none none none',
+            },
+            opacity: 1, y: 0, x: 0,
+            duration: 0.8,
+            delay: i * 0.15,
+            ease: 'power3.out',
+            onComplete: () => item.classList.add('in-view'),
+        });
+    });
+
+    // Future tech tags
+    gsap.fromTo('.future-tech', { opacity: 0, y: 30 }, {
+        scrollTrigger: {
+            trigger: '.future-tech',
+            start: 'top 85%',
+        },
+        opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+        onComplete: function() {
+            document.querySelector('.future-tech')?.classList.add('in-view');
+        }
     });
 
     // Timer animation in solution section

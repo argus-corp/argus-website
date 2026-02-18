@@ -74,6 +74,21 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
     background-repeat: repeat; background-size: 256px;
 }
 
+/* ==================== MESH GRADIENT BACKGROUND ==================== */
+#gradient-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.4;
+    --gradient-color-1: #003d2e;
+    --gradient-color-2: #00674f;
+    --gradient-color-3: #003b5c;
+    --gradient-color-4: #004d40;
+}
+
 /* ==================== CURSOR ==================== */
 .cursor { position: fixed; top: 0; left: 0; z-index: 10000; pointer-events: none; mix-blend-mode: difference; }
 .cursor-dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; position: absolute; top: -3px; left: -3px; transition: transform 0.1s ease; }
@@ -92,14 +107,14 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
 .preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 .preloader-inner { text-align: center; width: 240px; }
 .preloader-logo { margin-bottom: 32px; color: var(--accent); display: flex; justify-content: center; }
-.preloader-eye { width: 60px; height: 60px; }
-.eye-outer { stroke-dasharray: 180; stroke-dashoffset: 180; animation: drawCircle 1.5s var(--ease-out-expo) forwards; }
-.eye-inner { stroke-dasharray: 90; stroke-dashoffset: 90; animation: drawCircle 1.5s 0.3s var(--ease-out-expo) forwards; }
-.eye-pupil { opacity: 0; animation: fadeIn 0.5s 0.8s forwards; }
-.scan-h, .scan-v { animation: scanPulse 2s infinite; }
-@keyframes drawCircle { to { stroke-dashoffset: 0; } }
+.preloader-diamond { width: 72px; height: 72px; }
+.diamond-top { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawDiamond 1.8s var(--ease-out-expo) forwards; }
+.diamond-bottom { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawDiamond 1.8s 0.2s var(--ease-out-expo) forwards; }
+.diamond-hex { stroke-dasharray: 1800; stroke-dashoffset: 1800; animation: drawHex 2s 0.1s var(--ease-out-expo) forwards; }
+.diamond-vline { opacity: 0; animation: fadeIn 0.6s 0.8s forwards; }
+@keyframes drawDiamond { to { stroke-dashoffset: 0; } }
+@keyframes drawHex { to { stroke-dashoffset: 0; } }
 @keyframes fadeIn { to { opacity: 1; } }
-@keyframes scanPulse { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.5; } }
 
 .preloader-bar-track { width: 100%; height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 16px; }
 .preloader-bar { width: 0%; height: 100%; background: var(--gradient-2); border-radius: 2px; transition: width 0.1s linear; }
@@ -191,9 +206,9 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
 
 /* ==================== HERO ==================== */
 .hero {
-    min-height: 100vh; display: flex; align-items: center;
+    min-height: 100vh; display: flex; align-items: center; justify-content: space-between;
     padding: 0 var(--container-padding); position: relative; z-index: 1;
-    max-width: var(--container-width); margin: 0 auto;
+    max-width: var(--container-width); margin: 0 auto; gap: 40px;
 }
 .hero-bg-canvas {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -202,7 +217,7 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
                 radial-gradient(ellipse at 70% 30%, rgba(0,180,216,0.04) 0%, transparent 50%),
                 radial-gradient(ellipse at 50% 80%, rgba(108,99,255,0.03) 0%, transparent 50%);
 }
-.hero-content { padding-top: 100px; position: relative; z-index: 2; max-width: 800px; }
+.hero-content { padding-top: 100px; position: relative; z-index: 2; max-width: 800px; flex: 1 1 auto; min-width: 0; }
 
 .hero-badge {
     display: inline-flex; align-items: center; gap: 8px;
@@ -231,6 +246,45 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
     background: var(--gradient-text);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+/* Typing effect */
+.typing-wrap {
+    display: inline;
+    white-space: nowrap;
+    font-size: 1em;
+    font-weight: 800;
+    letter-spacing: -2px;
+    vertical-align: baseline;
+    color: var(--accent);
+    -webkit-text-fill-color: var(--accent);
+}
+.typing-word { display: inline; }
+.typing-cursor {
+    display: inline-block;
+    color: var(--accent);
+    -webkit-text-fill-color: var(--accent);
+    animation: blink-cursor 0.8s steps(2) infinite;
+    margin-left: 1px;
+    font-weight: 400;
+}
+@keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Hero Logo */
+.hero-logo-visual {
+    flex-shrink: 0; width: 320px; max-width: 28vw;
+    position: relative; z-index: 2; opacity: 0;
+    margin-right: -60px;
+}
+.argus-3d-logo { width: 100%; height: auto; filter: drop-shadow(0 0 40px rgba(0,229,160,0.2)); }
+.logo-face, .logo-hex { stroke-dasharray: 2000; stroke-dashoffset: 2000; }
+.logo-text path { stroke-dasharray: 800; stroke-dashoffset: 800; }
+.logo-vline { opacity: 0.8; }
+
+@media (max-width: 900px) {
+    .hero { flex-direction: column; }
+    .hero-logo-visual { width: 260px; max-width: 60vw; order: -1; padding-top: 100px; }
+    .hero-content { padding-top: 20px; }
 }
 
 .hero-sub {
@@ -324,8 +378,8 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
 @media (max-width: 500px) { .problem-grid { grid-template-columns: 1fr; } }
 
 /* ==================== SOLUTION ==================== */
-.solution-headline { text-align: center; margin-bottom: 64px; }
-.solution-headline h3 { font-family: var(--font-display); font-size: clamp(24px, 3.5vw, 40px); font-weight: 700; margin-bottom: 24px; }
+.solution-headline { text-align: center; margin-bottom: 48px; }
+.solution-headline h3 { font-family: var(--font-display); font-size: clamp(24px, 3.5vw, 40px); font-weight: 700; margin-bottom: 20px; }
 .solution-timer {
     display: inline-flex; align-items: baseline; gap: 12px;
     padding: 16px 40px; background: var(--surface);
@@ -341,6 +395,10 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
 .timer-label { font-family: var(--font-mono); font-size: 16px; color: var(--accent); letter-spacing: 2px; }
 
 .solution-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+/* Conveyor Illustration */
+.conveyor-illustration { max-width: 780px; margin: 0 auto 48px; }
+.conveyor-svg { width: 100%; height: auto; overflow: visible; }
 .solution-card {
     background: var(--surface); backdrop-filter: blur(12px);
     border: 1px solid var(--border); border-radius: 20px;
@@ -366,7 +424,7 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
 
 .visualizer-stage {
     position: relative; width: 100%;
-    background: var(--bg-secondary);
+    background: rgba(10, 10, 14, 0.75);
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
 }
@@ -494,7 +552,7 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
     position: absolute; left: 20px; top: 0; bottom: 0;
     width: 2px; background: var(--border);
 }
-.future-item { position: relative; margin-bottom: 40px; }
+.future-item { position: relative; margin-bottom: 40px; opacity: 0; }
 .future-item:last-child { margin-bottom: 0; }
 .future-marker {
     position: absolute; left: -52px; top: 8px;
@@ -523,7 +581,7 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
 .future-card h4 { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 8px; }
 .future-card p { color: var(--text-secondary); font-size: 15px; line-height: 1.6; }
 
-.future-tech { text-align: center; }
+.future-tech { text-align: center; opacity: 0; }
 .future-tech h4 { font-family: var(--font-mono); font-size: 13px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 20px; }
 .future-tech-tags { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 .future-tech-tags span {

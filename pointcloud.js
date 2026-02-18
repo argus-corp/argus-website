@@ -23,7 +23,7 @@
 
     /* Z exaggeration for visual depth */
     var Z_EX  = 3.0;
-    var Z_OFF = 0.06;   // lift lines above surface
+    var Z_OFF = 0.0;   // no offset — paths sit on surface
 
     /* ---- State ---- */
     var scene, camera, renderer, cloud, measGroup, kpGroup;
@@ -59,7 +59,7 @@
         renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.setSize(wrap.clientWidth, wrap.clientHeight);
-        renderer.setClearColor(0x0a0a0e, 1);
+        renderer.setClearColor(0x000000, 0);
 
         measGroup = new THREE.Group();
         kpGroup   = new THREE.Group();
@@ -117,14 +117,15 @@
     }
 
     /* ============================================================
-       BUILD POINT CLOUD — depth-based coloring, all visible instantly
+       BUILD POINT CLOUD — spectrum depth coloring, random point sizes
        ============================================================ */
     function buildCloud(data) {
         var N = data.pointCount;
         var pos    = new Float32Array(N * 3);
         var colors = new Float32Array(N * 3);
+        var sizes  = new Float32Array(N);
 
-        // Collect Z values to compute depth mapping
+        // Collect Z values for depth mapping
         var zMin = Infinity, zMax = -Infinity;
         for (var i = 0; i < N; i++) {
             var zRaw = data.points[i * 3 + 2];
@@ -133,9 +134,12 @@
         }
         var zRange = zMax - zMin || 0.001;
 
-        // Map the 10cm band within the total Z span
-        var bandFraction = Math.min(100.0 / zSpanMm, 1.0);
-        var bandStart = (1.0 - bandFraction) / 2.0;
+        // Simple seeded PRNG to avoid Math.random() being too uniform
+        var seed = 12345;
+        function rand() {
+            seed = (seed * 16807 + 0) % 2147483647;
+            return (seed & 0x7fffffff) / 2147483647;
+        }
 
         for (var i = 0; i < N; i++) {
             var x =  data.points[i * 3];
@@ -146,49 +150,63 @@
             pos[i * 3 + 1] = y;
             pos[i * 3 + 2] = z;
 
-            // Depth color: map Z to 0→1 within the 10cm band
-            var zNorm = (data.points[i * 3 + 2] - zMin) / zRange;
-            var t = (zNorm - bandStart) / bandFraction;
-            t = Math.max(0.0, Math.min(1.0, t));
+            // Depth t: 0 (far/low Z) → 1 (close/high Z)
+            var t = (data.points[i * 3 + 2] - zMin) / zRange;
 
-            // 3-stop ramp: deep teal → emerald → bright cyan
+            // Spectrum / heatmap coloring:
+            // deep blue → cyan → green → yellow → red
             var r, g, b;
-            if (t < 0.5) {
-                var s = t * 2.0;
-                r = 0.02 + s * 0.03;
-                g = 0.25 + s * 0.35;
-                b = 0.40 - s * 0.10;
-            } else {
-                var s = (t - 0.5) * 2.0;
+            if (t < 0.25) {
+                var s = t / 0.25;
+                r = 0.05;
+                g = 0.05 + s * 0.55;
+                b = 0.55 + s * 0.20;
+            } else if (t < 0.5) {
+                var s = (t - 0.25) / 0.25;
                 r = 0.05 + s * 0.15;
                 g = 0.60 + s * 0.30;
-                b = 0.30 + s * 0.35;
+                b = 0.75 - s * 0.50;
+            } else if (t < 0.75) {
+                var s = (t - 0.5) / 0.25;
+                r = 0.20 + s * 0.60;
+                g = 0.90 - s * 0.05;
+                b = 0.25 - s * 0.15;
+            } else {
+                var s = (t - 0.75) / 0.25;
+                r = 0.80 + s * 0.15;
+                g = 0.85 - s * 0.50;
+                b = 0.10 - s * 0.05;
             }
 
             colors[i * 3]     = r;
             colors[i * 3 + 1] = g;
             colors[i * 3 + 2] = b;
+
+            // Random point size to break grid patterns (0.6 → 2.0 range)
+            sizes[i] = 0.6 + rand() * 1.4;
         }
 
         var geo = new THREE.BufferGeometry();
         geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
         geo.setAttribute('aColor',   new THREE.BufferAttribute(colors, 3));
+        geo.setAttribute('aSize',    new THREE.BufferAttribute(sizes, 1));
 
         var mat = new THREE.ShaderMaterial({
             uniforms: {
-                uPR:   { value: Math.min(window.devicePixelRatio, 2) },
-                uSize: { value: 1.5 },
+                uPR:       { value: Math.min(window.devicePixelRatio, 2) },
+                uBaseSize: { value: 1.2 },
             },
             vertexShader: [
                 'attribute vec3 aColor;',
+                'attribute float aSize;',
                 'varying vec3 vC;',
                 'uniform float uPR;',
-                'uniform float uSize;',
+                'uniform float uBaseSize;',
                 'void main() {',
                 '  vC = aColor;',
                 '  vec4 mv = modelViewMatrix * vec4(position, 1.0);',
-                '  gl_PointSize = uSize * uPR * (40.0 / -mv.z);',
-                '  gl_PointSize = clamp(gl_PointSize, 0.5, 5.0);',
+                '  gl_PointSize = aSize * uBaseSize * uPR * (40.0 / -mv.z);',
+                '  gl_PointSize = clamp(gl_PointSize, 0.5, 6.0);',
                 '  gl_Position = projectionMatrix * mv;',
                 '}'
             ].join('\n'),
@@ -197,7 +215,7 @@
                 'void main() {',
                 '  float d = length(gl_PointCoord - 0.5);',
                 '  if (d > 0.5) discard;',
-                '  float a = smoothstep(0.5, 0.05, d) * 0.80;',
+                '  float a = smoothstep(0.5, 0.08, d) * 0.82;',
                 '  gl_FragColor = vec4(vC, a);',
                 '}'
             ].join('\n'),
@@ -220,7 +238,7 @@
         var dotGeo = new THREE.SphereGeometry(0.006, 10, 10);
 
         data.keypoints.forEach(function (kp) {
-            var p = new THREE.Vector3(kp.pos[0], -kp.pos[1], kp.pos[2] * Z_EX + Z_OFF * 0.5);
+            var p = new THREE.Vector3(kp.pos[0], -kp.pos[1], kp.pos[2] * Z_EX);
 
             var dot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({
                 color: 0xffffff, transparent: true, opacity: 0.5,
@@ -241,15 +259,64 @@
 
             var col = measColor(pObj.name);
             var verts = pObj.path3d.map(function (p) {
-                return new THREE.Vector3(p[0], -p[1], p[2] * Z_EX + Z_OFF);
+                return new THREE.Vector3(p[0], -p[1], p[2] * Z_EX);
             });
 
-            var geo = new THREE.BufferGeometry().setFromPoints(verts);
-            var mat = new THREE.LineBasicMaterial({
-                color: col, transparent: true, opacity: 0, linewidth: 2,
+            // Thick tube with shader-based progressive reveal via uProgress
+            var curve = new THREE.CatmullRomCurve3(verts, false, 'centripetal', 0.3);
+            var tubeSeg = Math.min(verts.length * 2, 300);
+            var tubeGeo = new THREE.TubeGeometry(curve, tubeSeg, 0.006, 8, false);
+
+            // Compute per-vertex "t" parameter (0→1 along curve) for progressive reveal
+            var tubePositions = tubeGeo.getAttribute('position');
+            var vertCount = tubePositions.count;
+            var tAttr = new Float32Array(vertCount);
+            var radialSeg = 8; // must match TubeGeometry radialSegments
+            for (var vi = 0; vi < vertCount; vi++) {
+                // TubeGeometry lays out (tubeSeg+1) rings of (radialSeg+1) verts
+                var ring = Math.floor(vi / (radialSeg + 1));
+                tAttr[vi] = ring / tubeSeg;
+            }
+            tubeGeo.setAttribute('aT', new THREE.BufferAttribute(tAttr, 1));
+
+            var colVec = col;
+            var tubeMat = new THREE.ShaderMaterial({
+                uniforms: {
+                    uColor:    { value: colVec },
+                    uOpacity:  { value: 0.0 },
+                    uProgress: { value: 0.0 },
+                },
+                vertexShader: [
+                    'attribute float aT;',
+                    'varying float vT;',
+                    'void main() {',
+                    '  vT = aT;',
+                    '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+                    '}'
+                ].join('\n'),
+                fragmentShader: [
+                    'uniform vec3 uColor;',
+                    'uniform float uOpacity;',
+                    'uniform float uProgress;',
+                    'varying float vT;',
+                    'void main() {',
+                    '  if (vT > uProgress) discard;',
+                    '  gl_FragColor = vec4(uColor, uOpacity);',
+                    '}'
+                ].join('\n'),
+                transparent: true,
+                depthTest: true,
+                side: THREE.DoubleSide,
             });
-            var line = new THREE.Line(geo, mat);
-            geo.setDrawRange(0, 0);
+            var tube = new THREE.Mesh(tubeGeo, tubeMat);
+
+            // Keep thin line for fallback (hidden)
+            var lineGeo = new THREE.BufferGeometry().setFromPoints(verts);
+            var lineMat = new THREE.LineBasicMaterial({
+                color: col, transparent: true, opacity: 0, linewidth: 1,
+            });
+            var line = new THREE.Line(lineGeo, lineMat);
+            lineGeo.setDrawRange(0, 0);
 
             var dotGeo = new THREE.SphereGeometry(0.01, 10, 10);
             var startDot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({
@@ -262,11 +329,11 @@
             }));
             endDot.position.copy(verts[verts.length - 1]);
 
+            measGroup.add(tube);
             measGroup.add(line);
             measGroup.add(startDot);
             measGroup.add(endDot);
 
-            // Find matching measurement
             var measCm = 0;
             for (var j = 0; j < allMeasurements.length; j++) {
                 if (allMeasurements[j].name === pObj.name) {
@@ -279,6 +346,7 @@
 
             measLines.push({
                 name: pObj.name,
+                tube: tube,
                 line: line,
                 startDot: startDot,
                 endDot: endDot,
@@ -288,6 +356,18 @@
                 midPoint: verts[midIdx].clone(),
             });
         });
+    }
+
+    /* Helper: set measurement opacity (tube shader + line) */
+    function setMeasOpacity(m, op) {
+        m.tube.material.uniforms.uOpacity.value = op;
+        m.line.material.opacity = op;
+    }
+
+    /* Helper: set tube progress (0→1, how much of the path is drawn) */
+    function setMeasProgress(m, prog) {
+        m.tube.material.uniforms.uProgress.value = prog;
+        m.line.geometry.setDrawRange(0, Math.floor(prog * m.total));
     }
 
     /* ============================================================
@@ -300,9 +380,12 @@
         var duration = 1800;
         var t0 = performance.now();
 
+        // Reset all to beginning state
         measLines.forEach(function (m) {
             m.startDot.material.opacity = 1;
-            m.line.material.opacity = 0.9;
+            m.endDot.material.opacity = 0;
+            setMeasOpacity(m, 0.9);
+            setMeasProgress(m, 0);    // start from 0 — nothing drawn yet
         });
 
         var rows = document.querySelectorAll('.viz-measurement-row');
@@ -310,21 +393,18 @@
         function step(ts) {
             var elapsed = ts - t0;
             var p = Math.min(elapsed / duration, 1);
-            var e = 1 - Math.pow(1 - p, 3);
+            var e = 1 - Math.pow(1 - p, 3);  // ease-out cubic
 
             measLines.forEach(function (m, i) {
-                var drawn = Math.floor(e * m.total);
-                m.line.geometry.setDrawRange(0, drawn);
+                // Progressively reveal tube + line from start to end
+                setMeasProgress(m, e);
 
+                // Animate counter in HUD
                 if (rows[i]) {
                     var valEl = rows[i].querySelector('.viz-measurement-value');
                     if (valEl) {
                         valEl.innerHTML = (m.measCm * e).toFixed(1) + '<span class="unit">cm</span>';
                     }
-                }
-
-                if (p >= 1) {
-                    m.endDot.material.opacity = 1;
                 }
             });
 
@@ -333,8 +413,10 @@
             if (p < 1) {
                 requestAnimationFrame(step);
             } else {
+                // Finalize
                 measLines.forEach(function (m, i) {
                     m.endDot.material.opacity = 1;
+                    setMeasProgress(m, 1);
                     if (rows[i]) {
                         var valEl = rows[i].querySelector('.viz-measurement-value');
                         if (valEl) valEl.innerHTML = m.measCm.toFixed(1) + '<span class="unit">cm</span>';
@@ -392,7 +474,7 @@
             var hh = wrap.clientHeight / 2;
             el.style.left = (pos.x * hw + hw) + 'px';
             el.style.top  = (-pos.y * hh + hh) + 'px';
-            el.style.opacity = (m.line.material.opacity > 0) ? '0.9' : '0';
+            el.style.opacity = (m.tube.material.uniforms.uOpacity.value > 0) ? '0.9' : '0';
         });
     }
 
@@ -423,7 +505,8 @@
 
         measLines.forEach(function (m, i) {
             var active = (i === cycleIdx);
-            m.line.material.opacity = active ? 1.0 : 0.25;
+            setMeasOpacity(m, active ? 1.0 : 0.25);
+            setMeasProgress(m, 1);  // keep fully drawn
             m.startDot.material.opacity = active ? 1 : 0.2;
             m.endDot.material.opacity = active ? 1 : 0.2;
             if (rows[i]) rows[i].classList.toggle('selected', active);
@@ -468,7 +551,7 @@
                 if (rows[idx] && rows[idx].classList.contains('selected') && !cycleRunning) {
                     // Deselect → show all, restart cycle
                     measLines.forEach(function (m2) {
-                        m2.line.material.opacity = 0.9;
+                        setMeasOpacity(m2, 0.9);
                         m2.startDot.material.opacity = 1;
                         m2.endDot.material.opacity = 1;
                     });
@@ -480,7 +563,7 @@
                     stopHighlightCycle();
                     measLines.forEach(function (m2, j) {
                         var active = (j === idx);
-                        m2.line.material.opacity = active ? 1.0 : 0.12;
+                        setMeasOpacity(m2, active ? 1.0 : 0.12);
                         m2.startDot.material.opacity = active ? 1 : 0.1;
                         m2.endDot.material.opacity = active ? 1 : 0.1;
                     });
@@ -557,7 +640,7 @@
             if (cycleRunning) {
                 stopHighlightCycle();
                 measLines.forEach(function (m) {
-                    m.line.material.opacity = 0.9;
+                    setMeasOpacity(m, 0.9);
                     m.startDot.material.opacity = 1;
                     m.endDot.material.opacity = 1;
                 });
@@ -568,8 +651,8 @@
                 playBtn.classList.remove('active');
             } else {
                 measLines.forEach(function (m) {
-                    m.line.geometry.setDrawRange(0, 0);
-                    m.line.material.opacity = 0;
+                    setMeasProgress(m, 0);
+                    setMeasOpacity(m, 0);
                     m.startDot.material.opacity = 0;
                     m.endDot.material.opacity = 0;
                 });

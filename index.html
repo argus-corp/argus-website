@@ -7,7 +7,7 @@
     <meta name="description" content="Millimeter-precise garment measurements in 3 seconds — fully automated, fully auditable. Argus transforms garment quality control.">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2300E5A0'/><text x='50' y='70' font-family='monospace' font-size='56' font-weight='bold' fill='%230a0a0b' text-anchor='middle'>A</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='700 150 610 560'%3E%3Cpath d='M1001.34,179.75l-268.17,124l268.17,100l268.83-100Z' fill='none' stroke='%2300E5A0' stroke-width='6'/%3E%3Cpath d='M1002,512.74l-268.83,100l268.83,124l268.17-124Z' fill='none' stroke='%2300E5A0' stroke-width='6'/%3E%3Cpath d='M1001.83,179.75L734.07,303.84l-1.41,309.91l269.17,122l268.83-122l1.01-309.91Z' fill='none' stroke='%2300E5A0' stroke-width='6' opacity='0.7'/%3E%3Crect x='1000.65' y='514.75' width='2.18' height='216' fill='%2300E5A0' opacity='0.6'/%3E%3Crect x='1000.65' y='186.88' width='2.04' height='216' fill='%2300E5A0' opacity='0.6'/%3E%3C/svg%3E">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +26,9 @@
     <!-- Film Grain -->
     <div class="noise"></div>
 
+    <!-- Mesh Gradient Background (Stripe-style WebGL) -->
+    <canvas id="gradient-canvas" data-js-darken-top data-transition-in></canvas>
+
     <!-- Custom Cursor -->
     <div class="cursor" id="cursor">
         <div class="cursor-dot"></div>
@@ -36,13 +39,12 @@
     <div class="preloader" id="preloader">
         <div class="preloader-inner">
             <div class="preloader-logo">
-                <svg viewBox="0 0 60 60" class="preloader-eye">
-                    <circle cx="30" cy="30" r="28" stroke="currentColor" stroke-width="1" fill="none" class="eye-outer"/>
-                    <circle cx="30" cy="30" r="14" stroke="currentColor" stroke-width="1" fill="none" class="eye-inner"/>
-                    <circle cx="30" cy="30" r="4" fill="currentColor" class="eye-pupil"/>
-                    <!-- Scan lines -->
-                    <line x1="2" y1="30" x2="58" y2="30" stroke="currentColor" stroke-width="0.5" class="scan-h" opacity="0.3"/>
-                    <line x1="30" y1="2" x2="30" y2="58" stroke="currentColor" stroke-width="0.5" class="scan-v" opacity="0.3"/>
+                <svg viewBox="700 150 610 560" class="preloader-diamond">
+                    <path class="diamond-top" d="M1001.34,179.75l-268.17,124l268.17,100l268.83-100Z" fill="none" stroke="currentColor" stroke-width="4"/>
+                    <path class="diamond-bottom" d="M1002,512.74l-268.83,100l268.83,124l268.17-124Z" fill="none" stroke="currentColor" stroke-width="4"/>
+                    <path class="diamond-hex" d="M1001.83,179.75L734.07,303.84l-1.41,309.91l269.17,122l268.83-122l1.01-309.91Z" fill="none" stroke="currentColor" stroke-width="4" opacity="0.5"/>
+                    <rect class="diamond-vline" x="1000" y="514.75" width="3" height="216" fill="currentColor" opacity="0.4"/>
+                    <rect class="diamond-vline" x="1000" y="186.88" width="3" height="216" fill="currentColor" opacity="0.4"/>
                 </svg>
             </div>
             <div class="preloader-bar-track">
@@ -59,10 +61,12 @@
     <nav class="nav" id="navbar">
         <a href="#" class="nav-logo" data-magnetic>
             <span class="nav-logo-icon">
-                <svg viewBox="0 0 32 32" width="32" height="32">
-                    <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                    <circle cx="16" cy="16" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                    <circle cx="16" cy="16" r="2" fill="currentColor"/>
+                <svg viewBox="700 150 610 560" width="28" height="28">
+                    <path d="M1001.34,179.75l-268.17,124l268.17,100l268.83-100Z" fill="none" stroke="currentColor" stroke-width="8"/>
+                    <path d="M1002,512.74l-268.83,100l268.83,124l268.17-124Z" fill="none" stroke="currentColor" stroke-width="8"/>
+                    <path d="M1001.83,179.75L734.07,303.84l-1.41,309.91l269.17,122l268.83-122l1.01-309.91Z" fill="none" stroke="currentColor" stroke-width="8" opacity="0.6"/>
+                    <rect x="999" y="514.75" width="5" height="216" fill="currentColor" opacity="0.5"/>
+                    <rect x="999" y="186.88" width="5" height="216" fill="currentColor" opacity="0.5"/>
                 </svg>
             </span>
             <span class="nav-logo-text">ARGUS</span>
@@ -103,7 +107,8 @@
             </div>
             <h1 class="hero-title" data-animate>
                 <span class="hero-line"><span class="hero-line-inner">Measure Every</span></span>
-                <span class="hero-line"><span class="hero-line-inner">Garment. <em class="hero-accent">Perfectly.</em></span></span>
+                <span class="hero-line"><span class="hero-line-inner">Garment.</span></span>
+                <span class="hero-line"><span class="hero-line-inner"><span class="typing-wrap"><span class="typing-word" id="typingWord">Perfectly.</span><span class="typing-cursor">|</span></span></span></span>
             </h1>
             <p class="hero-sub" data-animate>
                 Millimeter-precise garment measurements in <strong>3 seconds</strong> — fully automated, fully auditable.
@@ -133,6 +138,48 @@
                     <span>Get In Touch</span>
                 </a>
             </div>
+        </div>
+        <!-- Argus 3D Logo -->
+        <div class="hero-logo-visual" id="heroLogo">
+            <svg viewBox="640 130 730 630" class="argus-3d-logo" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="lg1" x1="733" y1="292" x2="1270" y2="292" gradientUnits="userSpaceOnUse">
+                        <stop offset="0.46" stop-color="#00E5A0"/>
+                        <stop offset="1" stop-color="#000"/>
+                    </linearGradient>
+                    <linearGradient id="lg2" x1="1270" y1="625" x2="733" y2="625" gradientUnits="userSpaceOnUse">
+                        <stop offset="0.46" stop-color="#00E5A0"/>
+                        <stop offset="1" stop-color="#000"/>
+                    </linearGradient>
+                    <linearGradient id="lg3" x1="790" y1="671" x2="1214" y2="247" gradientUnits="userSpaceOnUse">
+                        <stop offset="0" stop-color="#000"/>
+                        <stop offset="0.35" stop-color="#00E5A0"/>
+                        <stop offset="0.51" stop-color="#00E5A0"/>
+                        <stop offset="0.75" stop-color="#00B4D8"/>
+                        <stop offset="1" stop-color="#000"/>
+                    </linearGradient>
+                    <linearGradient id="lg4" x1="1002" y1="731" x2="1001" y2="515" gradientUnits="userSpaceOnUse">
+                        <stop offset="0.26" stop-color="#000"/>
+                        <stop offset="1" stop-color="#00E5A0"/>
+                    </linearGradient>
+                    <linearGradient id="lg5" x1="1002" y1="403" x2="1001" y2="187" gradientUnits="userSpaceOnUse">
+                        <stop offset="0" stop-color="#00E5A0"/>
+                        <stop offset="0.74" stop-color="#000"/>
+                    </linearGradient>
+                </defs>
+                <path class="logo-face logo-top" d="M1001.34,179.75l-268.17,124l268.17,100l268.83-100Z" fill="none" stroke="url(#lg1)" stroke-width="2"/>
+                <path class="logo-face logo-bottom" d="M1002,512.74l-268.83,100l268.83,124l268.17-124Z" fill="none" stroke="url(#lg2)" stroke-width="2"/>
+                <path class="logo-hex" d="M1001.83,179.75L734.07,303.84l-1.41,309.91l269.17,122l268.83-122l1.01-309.91Z" fill="none" stroke="url(#lg3)" stroke-width="2" opacity="0.77"/>
+                <rect class="logo-vline logo-vline-bottom" x="1000.65" y="514.75" width="2.18" height="216" fill="url(#lg4)"/>
+                <rect class="logo-vline logo-vline-top" x="1000.65" y="186.88" width="2.04" height="216" fill="url(#lg5)"/>
+                <g class="logo-text" stroke="#00E5A0" stroke-miterlimit="10" fill="none">
+                    <path d="M889.05,429.75l21.91,56.8h-8.12l-5.03-13.07h-25.63l-5.03,13.07h-8.12l21.91-56.8H889.05z M875.26,465.37h19.41l-9.67-25.03L875.26,465.37z"/>
+                    <path d="M965.58,450.04c0,7.92-3.38,12.44-10.14,13.55l10.7,22.97h-8.99l-10.54-22.7h-17.79v22.7h-8.12v-56.8h31.09c9.19,0,13.78,4.61,13.78,13.82V450.04z M928.82,455.74h22.54c2.17,0,3.72-0.48,4.67-1.43s1.43-2.51,1.43-4.67v-5.66c0-2.17-0.48-3.72-1.43-4.67s-2.51-1.43-4.67-1.43h-22.54V455.74z"/>
+                    <path d="M979.13,437.88c0-1.11,0.21-2.16,0.63-3.15c0.42-0.99,1-1.85,1.74-2.57c0.74-0.73,1.6-1.31,2.59-1.74c0.99-0.44,2.04-0.65,3.15-0.65h30.82c1.11,0,2.16,0.22,3.15,0.65c0.99,0.44,1.86,1.02,2.59,1.74c0.74,0.73,1.32,1.58,1.74,2.57c0.42,0.99,0.63,2.04,0.63,3.15v7.33h-8.12v-7.33h-30.82v40.56h30.82v-13.79h-15.41v-8.12h23.53v21.91c0,1.11-0.21,2.16-0.63,3.15c-0.42,0.99-1,1.86-1.74,2.59c-0.74,0.74-1.6,1.32-2.59,1.74c-0.99,0.42-2.04,0.63-3.15,0.63h-30.82c-1.11,0-2.16-0.21-3.15-0.63c-0.99-0.42-1.86-1-2.59-1.74c-0.74-0.74-1.32-1.6-1.74-2.59c-0.42-0.99-0.63-2.04-0.63-3.15V437.88z"/>
+                    <path d="M1040.76,429.75h8.12v48.68h32.44v-48.68h8.12v48.68c0,1.11-0.21,2.16-0.63,3.15c-0.42,0.99-1,1.86-1.74,2.59c-0.74,0.74-1.6,1.32-2.59,1.74c-0.99,0.42-2.04,0.63-3.15,0.63h-32.44c-1.11,0-2.16-0.21-3.15-0.63c-0.99-0.42-1.86-1-2.59-1.74c-0.74-0.74-1.32-1.6-1.74-2.59c-0.42-0.99-0.63-2.04-0.63-3.15V429.75z"/>
+                    <path d="M1112.14,462.24c-1.11,0-2.16-0.22-3.15-0.65c-0.99-0.44-1.86-1.02-2.59-1.74c-0.74-0.73-1.32-1.58-1.74-2.57c-0.42-0.99-0.63-2.04-0.63-3.15v-16.24c0-1.11,0.21-2.16,0.63-3.15c0.42-0.99,1-1.85,1.74-2.57c0.74-0.73,1.6-1.31,2.59-1.74c0.99-0.44,2.04-0.65,3.15-0.65h27.57c1.11,0,2.16,0.22,3.15,0.65c0.99,0.44,1.85,1.02,2.59,1.74c0.74,0.73,1.32,1.58,1.74,2.57c0.42,0.99,0.63,2.04,0.63,3.15v7.33h-8.12v-7.33h-27.57v16.24h27.57c1.11,0,2.16,0.21,3.15,0.63s1.85,1,2.59,1.74c0.74,0.74,1.32,1.6,1.74,2.59c0.42,0.99,0.63,2.04,0.63,3.15v16.2c0,1.11-0.21,2.16-0.63,3.15c-0.42,0.99-1,1.86-1.74,2.59c-0.74,0.74-1.6,1.32-2.59,1.74c-0.99,0.42-2.04,0.63-3.15,0.63h-28.36c-1.11,0-2.16-0.21-3.15-0.63c-0.99-0.42-1.86-1-2.59-1.74c-0.74-0.74-1.32-1.6-1.74-2.59c-0.42-0.99-0.63-2.04-0.63-3.15v-7.29h8.12v7.29h28.36v-16.2H1112.14z"/>
+                </g>
+            </svg>
         </div>
         <div class="hero-scroll">
             <div class="hero-scroll-line"><div class="hero-scroll-dot"></div></div>
@@ -164,7 +211,7 @@
                     <div class="problem-card-icon">
                         <svg viewBox="0 0 48 48" width="48" height="48"><circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="14" x2="34" y2="34" stroke="var(--danger)" stroke-width="2" stroke-linecap="round"/></svg>
                     </div>
-                    <div class="problem-card-number">Limited QC Only</div>
+                    <div class="problem-card-number">Limited QC</div>
                     <p>Inspectors can only check a fraction of production</p>
                 </div>
                 <div class="problem-card" data-animate="fade-up">
@@ -203,6 +250,144 @@
                     <span class="timer-number" id="timerNumber">3</span>
                     <span class="timer-label">seconds</span>
                 </div>
+            </div>
+            <!-- Conveyor Belt Illustration -->
+            <div class="conveyor-illustration" data-animate="fade-up">
+                <svg viewBox="0 0 900 280" class="conveyor-svg" xmlns="http://www.w3.org/2000/svg">
+                    <!-- === MAIN BELT (top track) === -->
+                    <rect x="40" y="118" width="820" height="14" rx="7" fill="none" stroke="var(--border)" stroke-width="1.2"/>
+                    <line x1="40" y1="125" x2="860" y2="125" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="8 6">
+                        <animate attributeName="stroke-dashoffset" from="0" to="-28" dur="0.8s" repeatCount="indefinite"/>
+                    </line>
+
+                    <!-- Rollers (main belt) -->
+                    <circle cx="55" cy="125" r="12" fill="none" stroke="var(--text-muted)" stroke-width="1">
+                        <animateTransform attributeName="transform" type="rotate" from="0 55 125" to="360 55 125" dur="1.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="450" cy="125" r="12" fill="none" stroke="var(--text-muted)" stroke-width="1">
+                        <animateTransform attributeName="transform" type="rotate" from="0 450 125" to="360 450 125" dur="1.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="845" cy="125" r="12" fill="none" stroke="var(--text-muted)" stroke-width="1">
+                        <animateTransform attributeName="transform" type="rotate" from="0 845 125" to="360 845 125" dur="1.5s" repeatCount="indefinite"/>
+                    </circle>
+
+                    <!-- === RETURN BELT (below, for failed items) === -->
+                    <rect x="40" y="228" width="520" height="10" rx="5" fill="none" stroke="var(--border)" stroke-width="0.8" opacity="0.4"/>
+                    <line x1="40" y1="233" x2="560" y2="233" stroke="var(--border)" stroke-width="0.4" stroke-dasharray="6 5" opacity="0.3">
+                        <animate attributeName="stroke-dashoffset" from="-22" to="0" dur="0.8s" repeatCount="indefinite"/>
+                    </line>
+                    <!-- Return belt connectors (vertical) -->
+                    <line x1="560" y1="132" x2="560" y2="228" stroke="var(--border)" stroke-width="0.8" opacity="0.3" stroke-dasharray="4 3"/>
+                    <line x1="40" y1="132" x2="40" y2="228" stroke="var(--border)" stroke-width="0.8" opacity="0.3" stroke-dasharray="4 3"/>
+                    <!-- Return rollers -->
+                    <circle cx="55" cy="233" r="8" fill="none" stroke="var(--text-muted)" stroke-width="0.8" opacity="0.4">
+                        <animateTransform attributeName="transform" type="rotate" from="360 55 233" to="0 55 233" dur="1.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="545" cy="233" r="8" fill="none" stroke="var(--text-muted)" stroke-width="0.8" opacity="0.4">
+                        <animateTransform attributeName="transform" type="rotate" from="360 545 233" to="0 545 233" dur="1.5s" repeatCount="indefinite"/>
+                    </circle>
+
+                    <!-- === ARGUS SCANNER === -->
+                    <g transform="translate(330,30)">
+                        <!-- Scanner housing -->
+                        <rect x="-28" y="-16" width="56" height="34" rx="6" fill="rgba(0,229,160,0.05)" stroke="var(--accent)" stroke-width="1.5"/>
+                        <circle cx="0" cy="1" r="11" fill="none" stroke="var(--accent)" stroke-width="1.2"/>
+                        <circle cx="0" cy="1" r="4" fill="var(--accent)" opacity="0.5"/>
+                        <!-- Scan beam -->
+                        <polygon points="-24,18 24,18 36,88 -36,88" fill="var(--accent)" opacity="0.04"/>
+                        <line x1="-24" y1="18" x2="-36" y2="88" stroke="var(--accent)" stroke-width="0.6" opacity="0.25"/>
+                        <line x1="24" y1="18" x2="36" y2="88" stroke="var(--accent)" stroke-width="0.6" opacity="0.25"/>
+                        <!-- Scan line sweeping -->
+                        <line x1="-30" y1="50" x2="30" y2="50" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" opacity="0.6">
+                            <animate attributeName="y1" values="22;85;22" dur="1.8s" repeatCount="indefinite"/>
+                            <animate attributeName="y2" values="22;85;22" dur="1.8s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.7;0.2;0.7" dur="1.8s" repeatCount="indefinite"/>
+                        </line>
+                        <text x="0" y="-24" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="9" letter-spacing="2" opacity="0.8">ARGUS</text>
+                    </g>
+
+                    <!-- === DECISION FORK (after scanner) === -->
+                    <!-- Pass arrow (continues right) -->
+                    <g transform="translate(620,90)">
+                        <path d="M0,35 L60,35" stroke="#00E5A0" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+                        <polygon points="58,31 68,35 58,39" fill="#00E5A0" opacity="0.5"/>
+                    </g>
+                    <!-- Fail arrow (goes down to return belt) -->
+                    <g transform="translate(560,132)">
+                        <path d="M0,0 L0,96" stroke="#FF6B6B" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+                        <polygon points="-4,92 0,102 4,92" fill="#FF6B6B" opacity="0.4"/>
+                    </g>
+                    <!-- Return arrow (goes left on bottom belt back to start) -->
+                    <g transform="translate(50,233)">
+                        <polygon points="4,-4 -6,0 4,4" fill="var(--text-muted)" opacity="0.3"/>
+                    </g>
+                    <!-- Re-entry arrow (goes up from return belt to main belt) -->
+                    <g transform="translate(40,132)">
+                        <path d="M0,96 L0,0" stroke="var(--text-muted)" stroke-width="0.8" stroke-dasharray="4 3" opacity="0.3"/>
+                        <polygon points="-4,4 0,-6 4,4" fill="var(--text-muted)" opacity="0.3"/>
+                    </g>
+
+                    <!-- === PASS T-SHIRT (green, exits right) === -->
+                    <g>
+                        <g>
+                            <path d="M0-20 l-12-8 -8,12 9,5 v20 h22 v-20 l9-5 -8-12z" fill="none" stroke="#00E5A0" stroke-width="1.2" stroke-linejoin="round"/>
+                            <text x="0" y="28" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="#00E5A0" opacity="0.8">✓</text>
+                        </g>
+                        <animateMotion dur="7s" repeatCount="indefinite" keyPoints="0;0.38;0.42;1" keyTimes="0;0.35;0.45;1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.1 0 0.9 1; 0.4 0 0.6 1">
+                            <mpath href="#passPath"/>
+                        </animateMotion>
+                    </g>
+
+                    <!-- === FAIL T-SHIRT (red, loops back) === -->
+                    <g opacity="0.6">
+                        <g>
+                            <path d="M0-20 l-12-8 -8,12 9,5 v20 h22 v-20 l9-5 -8-12z" fill="none" stroke="#FF6B6B" stroke-width="1.2" stroke-linejoin="round"/>
+                            <text x="0" y="28" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="#FF6B6B" opacity="0.8">✗</text>
+                        </g>
+                        <animateMotion dur="10s" repeatCount="indefinite" keyPoints="0;0.28;0.33;0.48;0.52;0.78;0.82;1" keyTimes="0;0.25;0.30;0.45;0.50;0.75;0.80;1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.1 0 0.9 1; 0.4 0 0.6 1; 0.1 0 0.9 1; 0.4 0 0.6 1; 0.1 0 0.9 1; 0.4 0 0.6 1">
+                            <mpath href="#failLoopPath"/>
+                        </animateMotion>
+                    </g>
+
+                    <!-- === SECOND PASS SHIRT (staggered, green) === -->
+                    <g>
+                        <g>
+                            <path d="M0-20 l-12-8 -8,12 9,5 v20 h22 v-20 l9-5 -8-12z" fill="none" stroke="#00E5A0" stroke-width="1" stroke-linejoin="round" opacity="0.5"/>
+                        </g>
+                        <animateMotion dur="7s" begin="3.5s" repeatCount="indefinite" keyPoints="0;0.38;0.42;1" keyTimes="0;0.35;0.45;1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.1 0 0.9 1; 0.4 0 0.6 1">
+                            <mpath href="#passPath"/>
+                        </animateMotion>
+                    </g>
+
+                    <!-- === EXIT DOOR (right side) === -->
+                    <g transform="translate(850,72)">
+                        <rect x="-14" y="-30" width="28" height="60" rx="3" fill="none" stroke="#00E5A0" stroke-width="1.2" opacity="0.5"/>
+                        <rect x="-10" y="-26" width="20" height="52" rx="2" fill="rgba(0,229,160,0.03)"/>
+                        <line x1="0" y1="-30" x2="0" y2="30" stroke="#00E5A0" stroke-width="0.5" stroke-dasharray="3 2" opacity="0.3"/>
+                        <text x="0" y="44" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="#00E5A0" letter-spacing="1" opacity="0.6">EXIT</text>
+                    </g>
+
+                    <!-- PASS badge -->
+                    <g transform="translate(720,60)">
+                        <rect x="-24" y="-11" width="48" height="22" rx="11" fill="rgba(0,229,160,0.08)" stroke="#00E5A0" stroke-width="1"/>
+                        <text x="0" y="4" text-anchor="middle" fill="#00E5A0" font-family="var(--font-mono)" font-size="9" font-weight="600">PASS</text>
+                    </g>
+                    <!-- FAIL badge -->
+                    <g transform="translate(580,172)">
+                        <rect x="-24" y="-11" width="48" height="22" rx="11" fill="rgba(255,107,107,0.06)" stroke="#FF6B6B" stroke-width="1" opacity="0.6"/>
+                        <text x="0" y="4" text-anchor="middle" fill="#FF6B6B" font-family="var(--font-mono)" font-size="9" font-weight="600" opacity="0.6">FAIL</text>
+                    </g>
+                    <!-- RETRY label on return belt -->
+                    <g transform="translate(300,250)">
+                        <text x="0" y="0" text-anchor="middle" font-family="var(--font-mono)" font-size="8" fill="var(--text-muted)" letter-spacing="2" opacity="0.3">← RETRY</text>
+                    </g>
+
+                    <!-- === MOTION PATHS === -->
+                    <!-- Pass path: enter left → scan → exit right -->
+                    <path id="passPath" d="M20,100 L850,100" fill="none" stroke="none"/>
+                    <!-- Fail loop: enter left → scan → drop down → go left on return belt → back up → re-enter -->
+                    <path id="failLoopPath" d="M20,100 L560,100 L560,230 L40,230 L40,100 L20,100" fill="none" stroke="none"/>
+                </svg>
             </div>
             <div class="solution-features">
                 <div class="solution-card" data-animate="fade-up">
@@ -329,7 +514,7 @@
             </div>
             <div class="future-timeline">
                 <div class="future-timeline-line"></div>
-                <div class="future-item future-item-active" data-animate="fade-up">
+                <div class="future-item future-item-active">
                     <div class="future-marker">
                         <div class="future-marker-dot"></div>
                     </div>
@@ -339,7 +524,7 @@
                         <p>Millimeter-accurate automated garment measurement — the hardest technical challenge in QC. We started here.</p>
                     </div>
                 </div>
-                <div class="future-item" data-animate="fade-up">
+                <div class="future-item">
                     <div class="future-marker">
                         <div class="future-marker-dot"></div>
                     </div>
@@ -349,7 +534,7 @@
                         <p>Automated identification of fabric defects, stains, holes, and surface irregularities.</p>
                     </div>
                 </div>
-                <div class="future-item" data-animate="fade-up">
+                <div class="future-item">
                     <div class="future-marker">
                         <div class="future-marker-dot"></div>
                     </div>
@@ -360,7 +545,7 @@
                     </div>
                 </div>
             </div>
-            <div class="future-tech" data-animate="fade-up">
+            <div class="future-tech">
                 <h4>Powered By</h4>
                 <div class="future-tech-tags">
                     <span>Advanced Camera Systems</span>
@@ -406,6 +591,11 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="Gradient.js"></script>
+    <script>
+        var gradient = new Gradient();
+        gradient.initGradient('#gradient-canvas');
+    </script>
     <script src="pointcloud.js"></script>
     <script src="app.js"></script>
 </body>
