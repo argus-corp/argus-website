@@ -1,0 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Raw data (not needed for the website)
+XL250_2700_tshirt_export_20260218_123302/
+
+# Reference site (not part of Argus)
+marufahmed.github.io-experimental/
+
+# Preprocessing script & notes
+preprocess.py
+content.md
+
+# OS files
+.DS_Store
+Thumbs.db
