@@ -218,7 +218,7 @@
                     <div class="problem-card-icon">
                         <svg viewBox="0 0 48 48" width="48" height="48"><circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M24 16v8l-4 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="24" cy="32" r="2" fill="currentColor"/></svg>
                     </div>
-                    <div class="problem-card-number">1–2mm</div>
+                    <div class="problem-card-number">5-10mm</div>
                     <p>deviation triggers buyer rejections and lost orders</p>
                 </div>
                 <div class="problem-card" data-animate="fade-up">
@@ -327,44 +327,16 @@
                         <polygon points="-4,4 0,-6 4,4" fill="var(--text-muted)" opacity="0.3"/>
                     </g>
 
-                    <!-- === PASS T-SHIRT (green, exits right) === -->
-                    <g>
-                        <g>
-                            <path d="M0-20 l-12-8 -8,12 9,5 v20 h22 v-20 l9-5 -8-12z" fill="none" stroke="#00E5A0" stroke-width="1.2" stroke-linejoin="round"/>
-                            <text x="0" y="28" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="#00E5A0" opacity="0.8">✓</text>
-                        </g>
-                        <animateMotion dur="7s" repeatCount="indefinite" keyPoints="0;0.38;0.42;1" keyTimes="0;0.35;0.45;1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.1 0 0.9 1; 0.4 0 0.6 1">
-                            <mpath href="#passPath"/>
-                        </animateMotion>
-                    </g>
-
-                    <!-- === FAIL T-SHIRT (red, loops back) === -->
-                    <g opacity="0.6">
-                        <g>
-                            <path d="M0-20 l-12-8 -8,12 9,5 v20 h22 v-20 l9-5 -8-12z" fill="none" stroke="#FF6B6B" stroke-width="1.2" stroke-linejoin="round"/>
-                            <text x="0" y="28" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="#FF6B6B" opacity="0.8">✗</text>
-                        </g>
-                        <animateMotion dur="10s" repeatCount="indefinite" keyPoints="0;0.28;0.33;0.48;0.52;0.78;0.82;1" keyTimes="0;0.25;0.30;0.45;0.50;0.75;0.80;1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.1 0 0.9 1; 0.4 0 0.6 1; 0.1 0 0.9 1; 0.4 0 0.6 1; 0.1 0 0.9 1; 0.4 0 0.6 1">
-                            <mpath href="#failLoopPath"/>
-                        </animateMotion>
-                    </g>
-
-                    <!-- === SECOND PASS SHIRT (staggered, green) === -->
-                    <g>
-                        <g>
-                            <path d="M0-20 l-12-8 -8,12 9,5 v20 h22 v-20 l9-5 -8-12z" fill="none" stroke="#00E5A0" stroke-width="1" stroke-linejoin="round" opacity="0.5"/>
-                        </g>
-                        <animateMotion dur="7s" begin="3.5s" repeatCount="indefinite" keyPoints="0;0.38;0.42;1" keyTimes="0;0.35;0.45;1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.1 0 0.9 1; 0.4 0 0.6 1">
-                            <mpath href="#passPath"/>
-                        </animateMotion>
-                    </g>
+                    <!-- === PASS T-SHIRT #1 — starts white, turns green at scanner === -->
+                    <!-- JS-driven shirts: spawned dynamically by app.js -->
+                    <g id="conveyorShirts"></g>
 
                     <!-- === EXIT DOOR (right side) === -->
                     <g transform="translate(850,72)">
                         <rect x="-14" y="-30" width="28" height="60" rx="3" fill="none" stroke="#00E5A0" stroke-width="1.2" opacity="0.5"/>
                         <rect x="-10" y="-26" width="20" height="52" rx="2" fill="rgba(0,229,160,0.03)"/>
                         <line x1="0" y1="-30" x2="0" y2="30" stroke="#00E5A0" stroke-width="0.5" stroke-dasharray="3 2" opacity="0.3"/>
-                        <text x="0" y="44" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="#00E5A0" letter-spacing="1" opacity="0.6">EXIT</text>
+                        <text x="0" y="44" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="#00E5A0" letter-spacing="1" opacity="0.6">PACKING</text>
                     </g>
 
                     <!-- PASS badge -->
@@ -379,7 +351,7 @@
                     </g>
                     <!-- RETRY label on return belt -->
                     <g transform="translate(300,250)">
-                        <text x="0" y="0" text-anchor="middle" font-family="var(--font-mono)" font-size="8" fill="var(--text-muted)" letter-spacing="2" opacity="0.3">← RETRY</text>
+                        <text x="0" y="0" text-anchor="middle" font-family="var(--font-mono)" font-size="8" fill="var(--text-muted)" letter-spacing="2" opacity="0.3">← REWORK</text>
                     </g>
 
                     <!-- === MOTION PATHS === -->
@@ -506,6 +478,8 @@
 
     <!-- ==================== FUTURE ==================== -->
     <section class="section future" id="future">
+        <!-- Ambient floating particles -->
+        <canvas class="future-particles" id="futureParticles"></canvas>
         <div class="container">
             <div class="section-header" data-animate="fade-up">
                 <span class="section-number">05</span>
@@ -513,35 +487,85 @@
                 <div class="section-line"></div>
             </div>
             <div class="future-timeline">
-                <div class="future-timeline-line"></div>
+                <div class="future-timeline-line">
+                    <div class="future-timeline-fill" id="futureTimelineFill"></div>
+                </div>
                 <div class="future-item future-item-active">
                     <div class="future-marker">
                         <div class="future-marker-dot"></div>
+                        <div class="future-marker-ping"></div>
                     </div>
                     <div class="future-card">
-                        <span class="future-tag">Today</span>
-                        <h4>Precise Measurements</h4>
-                        <p>Millimeter-accurate automated garment measurement — the hardest technical challenge in QC. We started here.</p>
+                        <div class="future-card-icon">
+                            <!-- Measurement / ruler icon -->
+                            <svg viewBox="0 0 64 64" class="future-svg-icon">
+                                <rect x="8" y="24" width="48" height="16" rx="3" class="fi-stroke"/>
+                                <line x1="16" y1="24" x2="16" y2="32" class="fi-stroke"/>
+                                <line x1="24" y1="24" x2="24" y2="36" class="fi-stroke"/>
+                                <line x1="32" y1="24" x2="32" y2="32" class="fi-stroke"/>
+                                <line x1="40" y1="24" x2="40" y2="36" class="fi-stroke"/>
+                                <line x1="48" y1="24" x2="48" y2="32" class="fi-stroke"/>
+                                <circle cx="32" cy="10" r="5" class="fi-stroke fi-dot"/>
+                                <line x1="32" y1="15" x2="32" y2="24" class="fi-stroke fi-connector"/>
+                            </svg>
+                        </div>
+                        <div class="future-card-content">
+                            <span class="future-tag">Today</span>
+                            <h4>Precise Measurements</h4>
+                            <p>Millimeter-accurate automated garment measurement — the hardest technical challenge in QC. We started here.</p>
+                        </div>
+                        <div class="future-card-glow"></div>
                     </div>
                 </div>
                 <div class="future-item">
                     <div class="future-marker">
                         <div class="future-marker-dot"></div>
+                        <div class="future-marker-ping"></div>
                     </div>
                     <div class="future-card">
-                        <span class="future-tag">Next</span>
-                        <h4>Defect Detection</h4>
-                        <p>Automated identification of fabric defects, stains, holes, and surface irregularities.</p>
+                        <div class="future-card-icon">
+                            <!-- Eye / defect detection icon -->
+                            <svg viewBox="0 0 64 64" class="future-svg-icon">
+                                <path d="M4 32 C4 32 16 12 32 12 C48 12 60 32 60 32 C60 32 48 52 32 52 C16 52 4 32 4 32Z" class="fi-stroke"/>
+                                <circle cx="32" cy="32" r="10" class="fi-stroke"/>
+                                <circle cx="32" cy="32" r="4" class="fi-stroke fi-dot"/>
+                                <line x1="46" y1="18" x2="52" y2="12" class="fi-stroke fi-accent"/>
+                                <line x1="49" y1="12" x2="55" y2="15" class="fi-stroke fi-accent"/>
+                            </svg>
+                        </div>
+                        <div class="future-card-content">
+                            <span class="future-tag">Next</span>
+                            <h4>Defect Detection</h4>
+                            <p>Automated identification of fabric defects, stains, holes, and surface irregularities.</p>
+                        </div>
+                        <div class="future-card-glow"></div>
                     </div>
                 </div>
                 <div class="future-item">
                     <div class="future-marker">
                         <div class="future-marker-dot"></div>
+                        <div class="future-marker-ping"></div>
                     </div>
                     <div class="future-card">
-                        <span class="future-tag">Coming</span>
-                        <h4>Full Visual Intelligence</h4>
-                        <p>Stitch & seam analysis, part mismatch detection, cutting inconsistencies — complete visual quality intelligence.</p>
+                        <div class="future-card-icon">
+                            <!-- Brain / full intelligence icon -->
+                            <svg viewBox="0 0 64 64" class="future-svg-icon">
+                                <path d="M32 8 C20 8 12 18 12 28 C12 36 16 42 22 46 L22 56 L42 56 L42 46 C48 42 52 36 52 28 C52 18 44 8 32 8Z" class="fi-stroke"/>
+                                <line x1="26" y1="56" x2="38" y2="56" class="fi-stroke"/>
+                                <line x1="27" y1="60" x2="37" y2="60" class="fi-stroke"/>
+                                <path d="M24 28 Q28 20 32 28 Q36 20 40 28" class="fi-stroke fi-accent"/>
+                                <circle cx="20" cy="34" r="2" class="fi-stroke fi-dot"/>
+                                <circle cx="44" cy="34" r="2" class="fi-stroke fi-dot"/>
+                                <line x1="20" y1="34" x2="12" y2="34" class="fi-stroke fi-connector"/>
+                                <line x1="44" y1="34" x2="52" y2="34" class="fi-stroke fi-connector"/>
+                            </svg>
+                        </div>
+                        <div class="future-card-content">
+                            <span class="future-tag">Coming</span>
+                            <h4>Full Visual Intelligence</h4>
+                            <p>Stitch & seam analysis, part mismatch detection, cutting inconsistencies — complete visual quality intelligence.</p>
+                        </div>
+                        <div class="future-card-glow"></div>
                     </div>
                 </div>
             </div>

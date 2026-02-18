@@ -547,10 +547,24 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
 @media (max-width: 500px) { .impact-grid { grid-template-columns: 1fr; } }
 
 /* ==================== FUTURE ==================== */
+.future { position: relative; overflow: hidden; }
+.future-particles {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+}
+.future .container { position: relative; z-index: 1; }
+
 .future-timeline { position: relative; padding-left: 60px; margin-bottom: 80px; }
 .future-timeline-line {
     position: absolute; left: 20px; top: 0; bottom: 0;
     width: 2px; background: var(--border);
+}
+.future-timeline-fill {
+    position: absolute; left: 0; top: 0; width: 100%;
+    height: 0%; background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow-strong), 0 0 24px rgba(0,229,160,0.15);
+    transition: height 0.1s linear;
+    border-radius: 0 0 2px 2px;
 }
 .future-item { position: relative; margin-bottom: 40px; opacity: 0; }
 .future-item:last-child { margin-bottom: 0; }
@@ -562,18 +576,100 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
 .future-marker-dot {
     width: 12px; height: 12px; border-radius: 50%;
     border: 2px solid var(--text-muted); background: var(--bg);
-    transition: all 0.4s ease;
+    transition: all 0.4s ease; z-index: 2;
+}
+.future-marker-ping {
+    position: absolute; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); opacity: 0; z-index: 1;
 }
 .future-item-active .future-marker-dot {
     border-color: var(--accent); background: var(--accent);
     box-shadow: 0 0 12px var(--accent-glow-strong);
 }
+.future-item-active .future-marker-ping {
+    animation: markerPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes markerPing {
+    0%   { transform: scale(1); opacity: 0.5; }
+    75%, 100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Card layout with icon */
 .future-card {
+    position: relative;
+    display: flex; align-items: flex-start; gap: 20px;
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 16px; padding: 28px 32px;
     transition: all 0.4s var(--ease-out-expo);
+    overflow: hidden;
 }
+.future-card:hover { border-color: rgba(0,229,160,0.3); transform: translateY(-2px); }
+.future-card-glow {
+    position: absolute; inset: 0; opacity: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(0,229,160,0.06) 0%, transparent 60%);
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+.future-card:hover .future-card-glow { opacity: 1; }
+.future-card-content { flex: 1; }
 .future-item-active .future-card { border-color: var(--accent-glow-strong); }
+
+/* SVG Icons — stroke-draw animation */
+.future-card-icon {
+    flex-shrink: 0; width: 56px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 4px;
+}
+.future-svg-icon {
+    width: 48px; height: 48px;
+    filter: drop-shadow(0 0 8px rgba(0,229,160,0.3));
+}
+.future-svg-icon .fi-stroke {
+    fill: none; stroke: var(--accent); stroke-width: 1.5;
+    stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 200; stroke-dashoffset: 200;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.future-svg-icon .fi-dot {
+    fill: rgba(0,229,160,0.15);
+}
+.future-svg-icon .fi-accent {
+    stroke: #FF6B6B;
+}
+.future-svg-icon .fi-connector {
+    stroke-dasharray: 40; stroke-dashoffset: 40;
+}
+/* When item animates in, draw the SVG */
+.future-item.in-view .fi-stroke {
+    stroke-dashoffset: 0;
+}
+.future-item.in-view .fi-connector {
+    stroke-dashoffset: 0;
+    transition-delay: 0.6s;
+}
+
+/* Subtle idle float for icons */
+.future-item.in-view .future-card-icon {
+    animation: iconFloat 3s ease-in-out infinite;
+}
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+/* Scan-line shimmer on active card */
+.future-item-active .future-card::before {
+    content: '';
+    position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,229,160,0.04), transparent);
+    animation: cardShimmer 4s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes cardShimmer {
+    0%   { left: -50%; }
+    100% { left: 150%; }
+}
+
 .future-tag {
     font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px;
     color: var(--accent); text-transform: uppercase; margin-bottom: 8px; display: block;
@@ -589,10 +685,23 @@ button { border: none; outline: none; background: none; cursor: none; font-famil
     border: 1px solid rgba(0,229,160,0.2); border-radius: 50px;
     font-size: 13px; color: var(--accent-light); font-weight: 500;
     transition: all 0.3s ease;
+    opacity: 0; transform: translateY(16px) scale(0.9);
 }
-.future-tech-tags span:hover { background: rgba(0,229,160,0.2); border-color: var(--accent); }
+.future-tech-tags span.in-view {
+    opacity: 1; transform: translateY(0) scale(1);
+}
+.future-tech-tags span:hover {
+    background: rgba(0,229,160,0.2); border-color: var(--accent);
+    box-shadow: 0 0 16px rgba(0,229,160,0.15);
+    transform: translateY(-2px) scale(1.04);
+}
 
-@media (max-width: 640px) { .future-timeline { padding-left: 40px; } .future-timeline-line { left: 10px; } .future-marker { left: -32px; } }
+@media (max-width: 640px) {
+    .future-timeline { padding-left: 40px; }
+    .future-timeline-line { left: 10px; }
+    .future-marker { left: -32px; }
+    .future-card-icon { display: none; }
+}
 
 /* ==================== CONTACT ==================== */
 .contact { padding: var(--section-padding) 0 calc(var(--section-padding) * 1.5); }
