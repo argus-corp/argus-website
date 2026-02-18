@@ -293,16 +293,10 @@
                         <rect x="-28" y="-16" width="56" height="34" rx="6" fill="rgba(0,229,160,0.05)" stroke="var(--accent)" stroke-width="1.5"/>
                         <circle cx="0" cy="1" r="11" fill="none" stroke="var(--accent)" stroke-width="1.2"/>
                         <circle cx="0" cy="1" r="4" fill="var(--accent)" opacity="0.5"/>
-                        <!-- Scan beam -->
+                        <!-- Scan beam (static cone shape, no sweeping line) -->
                         <polygon points="-24,18 24,18 36,88 -36,88" fill="var(--accent)" opacity="0.04"/>
                         <line x1="-24" y1="18" x2="-36" y2="88" stroke="var(--accent)" stroke-width="0.6" opacity="0.25"/>
                         <line x1="24" y1="18" x2="36" y2="88" stroke="var(--accent)" stroke-width="0.6" opacity="0.25"/>
-                        <!-- Scan line sweeping -->
-                        <line x1="-30" y1="50" x2="30" y2="50" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" opacity="0.6">
-                            <animate attributeName="y1" values="22;85;22" dur="1.8s" repeatCount="indefinite"/>
-                            <animate attributeName="y2" values="22;85;22" dur="1.8s" repeatCount="indefinite"/>
-                            <animate attributeName="opacity" values="0.7;0.2;0.7" dur="1.8s" repeatCount="indefinite"/>
-                        </line>
                         <text x="0" y="-24" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="9" letter-spacing="2" opacity="0.8">ARGUS</text>
                     </g>
 

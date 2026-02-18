@@ -22,7 +22,7 @@ gsap.registerPlugin(ScrollTrigger);
                 document.body.style.overflow = '';
                 initHeroAnimations();
                 initScrollAnimations();
-            }, 500);
+            }, 200);
         }
         bar.style.width = progress + '%';
         pct.textContent = Math.floor(progress) + '%';
@@ -126,21 +126,24 @@ gsap.registerPlugin(ScrollTrigger);
 function initHeroAnimations() {
     const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
-    tl.to('.hero-badge', { opacity: 1, y: 0, duration: 0.8, delay: 0.1 })
-      .to('.hero-line-inner', { opacity: 1, y: 0, duration: 1, stagger: 0.15 }, '-=0.5')
+    // Logo starts animating immediately (at time 0)
+    tl.fromTo('.hero-logo-visual', { opacity: 0, scale: 0.85, x: 40 },
+        { opacity: 1, scale: 1, x: 0, duration: 1.4, ease: 'power3.out' }, 0);
+
+    // Draw logo strokes right away too
+    tl.fromTo('.logo-face, .logo-hex', { strokeDashoffset: 2000 },
+        { strokeDashoffset: 0, duration: 2, stagger: 0.2, ease: 'power2.inOut' }, 0);
+    tl.fromTo('.logo-text path', { strokeDashoffset: 800 },
+        { strokeDashoffset: 0, duration: 1.5, stagger: 0.1, ease: 'power2.inOut' }, 0.3);
+
+    // Text content cascades in alongside
+    tl.to('.hero-badge', { opacity: 1, y: 0, duration: 0.8 }, 0.05)
+      .to('.hero-line-inner', { opacity: 1, y: 0, duration: 1, stagger: 0.15 }, 0.15)
       .to('.hero-sub', { opacity: 1, y: 0, duration: 0.8 }, '-=0.5')
       .to('.hero-stats-row', { opacity: 1, y: 0, duration: 0.8 }, '-=0.4')
       .to('.hero-cta', { opacity: 1, y: 0, duration: 0.8 }, '-=0.4')
       .to('.hero-scroll', { opacity: 1, duration: 0.8 }, '-=0.3')
-      .call(() => initTypingEffect(), null, '-=0.3')
-      .fromTo('.hero-logo-visual', { opacity: 0, scale: 0.85, x: 40 },
-          { opacity: 1, scale: 1, x: 0, duration: 1.4, ease: 'power3.out' }, '-=1');
-
-    // Draw logo strokes
-    tl.fromTo('.logo-face, .logo-hex', { strokeDashoffset: 2000 },
-        { strokeDashoffset: 0, duration: 2, stagger: 0.2, ease: 'power2.inOut' }, '-=1.2');
-    tl.fromTo('.logo-text path', { strokeDashoffset: 800 },
-        { strokeDashoffset: 0, duration: 1.5, stagger: 0.1, ease: 'power2.inOut' }, '-=1.5');
+      .call(() => initTypingEffect(), null, '-=0.3');
 
     // Animate hero stat counters
     setTimeout(() => {
