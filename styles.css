@@ -965,31 +965,97 @@ button {
 }
 
 .problem-callout {
-    display: flex;
-    gap: 24px;
-    align-items: flex-start;
-    padding: 32px;
+    text-align: center;
+    padding: 48px 32px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.problem-callout::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(255, 77, 106, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.problem-callout-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
 }
 
 .problem-callout-line {
-    width: 3px;
-    min-height: 100%;
+    width: 48px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--danger), transparent);
+}
+
+.problem-callout-lead {
+    color: var(--text-secondary);
+    font-size: 16px;
+    letter-spacing: 0.5px;
+}
+
+.problem-callout-highlight {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+}
+
+.problem-callout-highlight span {
+    color: var(--danger);
+    position: relative;
+}
+
+.problem-callout-highlight span::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
     background: var(--danger);
-    border-radius: 3px;
+    opacity: 0.5;
+    border-radius: 2px;
+}
+
+.problem-callout-consequences {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.problem-callout-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--danger);
+    opacity: 0.4;
     flex-shrink: 0;
 }
 
-.problem-callout p {
-    color: var(--text-secondary);
-    font-size: 18px;
-    line-height: 1.7;
-}
+@media (max-width: 600px) {
+    .problem-callout-consequences {
+        flex-direction: column;
+        gap: 8px;
+    }
 
-.problem-callout strong {
-    color: var(--danger);
+    .problem-callout-dot {
+        display: none;
+    }
 }
 
 @media (max-width: 900px) {
