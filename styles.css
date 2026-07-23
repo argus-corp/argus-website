@@ -1975,3 +1975,6 @@ button {
 .floor-legend i.cam { border-radius: 50%; }
 @media (max-width: 760px) { .floor-stats { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 460px) { .floor-stats { grid-template-columns: repeat(2, 1fr); } }
+
+/* Tighten the empty gap directly beneath the problem callout bar */
+.section.problem { padding-bottom: clamp(36px, 5vh, 60px); }

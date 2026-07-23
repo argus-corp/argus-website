@@ -614,23 +614,8 @@
         }, { passive: true });
         wrap.addEventListener('touchend', function () { isDragging = false; }, { passive: true });
 
-        wrap.addEventListener('wheel', function (e) {
-            var newR = tgtSph.radius + e.deltaY * 0.003;
-            newR = Math.max(1.5, Math.min(6, newR));
-
-            // If already at max zoom-out and scrolling down, let page scroll
-            if (e.deltaY > 0 && tgtSph.radius >= 5.95) {
-                // Don't prevent default — page scrolls naturally
-                return;
-            }
-            // If already at max zoom-in and scrolling up, let page scroll
-            if (e.deltaY < 0 && tgtSph.radius <= 1.55) {
-                return;
-            }
-
-            e.preventDefault();
-            tgtSph.radius = newR;
-        }, { passive: false });
+        // Scroll-to-zoom intentionally removed: it hijacked page scrolling.
+        // Use the on-screen zoom in / out buttons instead (see setupControls).
     }
 
     /* ---- Controls ---- */
@@ -638,6 +623,12 @@
         var autoBtn  = document.getElementById('vizAutoRotate');
         var resetBtn = document.getElementById('vizResetView');
         var playBtn  = document.getElementById('vizPlayMeasurements');
+        var zoomInBtn  = document.getElementById('vizZoomIn');
+        var zoomOutBtn = document.getElementById('vizZoomOut');
+
+        function zoomBy(delta) { tgtSph.radius = Math.max(1.5, Math.min(6, tgtSph.radius + delta)); }
+        if (zoomInBtn)  zoomInBtn.addEventListener('click',  function () { zoomBy(-0.6); }); // closer
+        if (zoomOutBtn) zoomOutBtn.addEventListener('click', function () { zoomBy(0.6);  }); // farther
 
         if (autoBtn) autoBtn.addEventListener('click', function () {
             autoRotate = !autoRotate;
