@@ -1933,3 +1933,45 @@ button {
     opacity: 1;
     transform: translateY(0);
 }
+/* ==================== FLOOR MODEL (Argus factory-floor animation) ==================== */
+.floor-viz { max-width: 1180px; margin: 0 auto 48px; }
+.floor-stats {
+    display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 1px;
+    background: var(--border); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; margin: 0 0 20px;
+}
+.floor-stat { background: rgba(12,12,18,0.72); backdrop-filter: blur(12px); padding: 16px 20px; }
+.floor-stat .v {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(20px, 2.2vw, 28px); line-height: 1;
+    font-variant-numeric: tabular-nums; color: var(--text);
+}
+.floor-stat .v .u { font-size: 14px; font-weight: 600; }
+.floor-stat .v.grad {
+    background: linear-gradient(135deg, #fff, #a0ffd8 60%, var(--accent));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.floor-stat .v.pass   { color: var(--accent); }
+.floor-stat .v.rework { color: #f5b942; }
+.floor-stat .v.fail   { color: var(--danger); }
+.floor-stat .v.packed { color: #33FFC0; }
+.floor-stat .k {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--text-secondary); margin-top: 8px;
+}
+.floor-stage {
+    background: rgba(8,8,12,0.55); border: 1px solid var(--border);
+    border-radius: 20px; padding: 8px; overflow: hidden;
+    box-shadow: 0 30px 80px -30px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+#floorSvg { width: 100%; height: auto; display: block; }
+.floor-legend {
+    display: flex; gap: 18px; flex-wrap: wrap; padding: 12px 16px 6px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--text-secondary);
+}
+.floor-legend .grp { color: var(--text-muted); font-weight: 600; letter-spacing: 1.5px; }
+.floor-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 7px; vertical-align: -1px; }
+.floor-legend i.cam { border-radius: 50%; }
+@media (max-width: 760px) { .floor-stats { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 460px) { .floor-stats { grid-template-columns: repeat(2, 1fr); } }

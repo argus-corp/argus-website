@@ -260,109 +260,28 @@
                     <span class="timer-label">seconds</span>
                 </div>
             </div>
-            <!-- Conveyor Belt Illustration -->
-            <div class="conveyor-illustration" data-animate="fade-up">
-                <svg viewBox="0 0 900 280" class="conveyor-svg" xmlns="http://www.w3.org/2000/svg">
-                    <!-- === MAIN BELT (top track) === -->
-                    <rect x="40" y="118" width="820" height="14" rx="7" fill="none" stroke="var(--border)" stroke-width="1.2"/>
-                    <line x1="40" y1="125" x2="860" y2="125" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="8 6">
-                        <animate attributeName="stroke-dashoffset" from="0" to="-28" dur="0.8s" repeatCount="indefinite"/>
-                    </line>
-
-                    <!-- Rollers (main belt) -->
-                    <circle cx="55" cy="125" r="12" fill="none" stroke="var(--text-muted)" stroke-width="1">
-                        <animateTransform attributeName="transform" type="rotate" from="0 55 125" to="360 55 125" dur="1.5s" repeatCount="indefinite"/>
-                    </circle>
-                    <circle cx="450" cy="125" r="12" fill="none" stroke="var(--text-muted)" stroke-width="1">
-                        <animateTransform attributeName="transform" type="rotate" from="0 450 125" to="360 450 125" dur="1.5s" repeatCount="indefinite"/>
-                    </circle>
-                    <circle cx="845" cy="125" r="12" fill="none" stroke="var(--text-muted)" stroke-width="1">
-                        <animateTransform attributeName="transform" type="rotate" from="0 845 125" to="360 845 125" dur="1.5s" repeatCount="indefinite"/>
-                    </circle>
-
-                    <!-- === RETURN BELT (below, for failed items) === -->
-                    <rect x="40" y="228" width="520" height="10" rx="5" fill="none" stroke="var(--border)" stroke-width="0.8" opacity="0.4"/>
-                    <line x1="40" y1="233" x2="560" y2="233" stroke="var(--border)" stroke-width="0.4" stroke-dasharray="6 5" opacity="0.3">
-                        <animate attributeName="stroke-dashoffset" from="-22" to="0" dur="0.8s" repeatCount="indefinite"/>
-                    </line>
-                    <!-- Return belt connectors (vertical) -->
-                    <line x1="560" y1="132" x2="560" y2="228" stroke="var(--border)" stroke-width="0.8" opacity="0.3" stroke-dasharray="4 3"/>
-                    <line x1="40" y1="132" x2="40" y2="228" stroke="var(--border)" stroke-width="0.8" opacity="0.3" stroke-dasharray="4 3"/>
-                    <!-- Return rollers -->
-                    <circle cx="55" cy="233" r="8" fill="none" stroke="var(--text-muted)" stroke-width="0.8" opacity="0.4">
-                        <animateTransform attributeName="transform" type="rotate" from="360 55 233" to="0 55 233" dur="1.5s" repeatCount="indefinite"/>
-                    </circle>
-                    <circle cx="545" cy="233" r="8" fill="none" stroke="var(--text-muted)" stroke-width="0.8" opacity="0.4">
-                        <animateTransform attributeName="transform" type="rotate" from="360 545 233" to="0 545 233" dur="1.5s" repeatCount="indefinite"/>
-                    </circle>
-
-                    <!-- === ARGUS SCANNER === -->
-                    <g transform="translate(330,30)">
-                        <!-- Scanner housing -->
-                        <rect x="-28" y="-16" width="56" height="34" rx="6" fill="rgba(0,229,160,0.05)" stroke="var(--accent)" stroke-width="1.5"/>
-                        <circle cx="0" cy="1" r="11" fill="none" stroke="var(--accent)" stroke-width="1.2"/>
-                        <circle cx="0" cy="1" r="4" fill="var(--accent)" opacity="0.5"/>
-                        <!-- Scan beam (static cone shape, no sweeping line) -->
-                        <polygon points="-24,18 24,18 36,88 -36,88" fill="var(--accent)" opacity="0.04"/>
-                        <line x1="-24" y1="18" x2="-36" y2="88" stroke="var(--accent)" stroke-width="0.6" opacity="0.25"/>
-                        <line x1="24" y1="18" x2="36" y2="88" stroke="var(--accent)" stroke-width="0.6" opacity="0.25"/>
-                        <text x="0" y="-24" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="9" letter-spacing="2" opacity="0.8">ARGUS</text>
-                    </g>
-
-                    <!-- === DECISION FORK (after scanner) === -->
-                    <!-- Pass arrow (continues right) -->
-                    <g transform="translate(620,90)">
-                        <path d="M0,35 L60,35" stroke="#00E5A0" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
-                        <polygon points="58,31 68,35 58,39" fill="#00E5A0" opacity="0.5"/>
-                    </g>
-                    <!-- Fail arrow (goes down to return belt) -->
-                    <g transform="translate(560,132)">
-                        <path d="M0,0 L0,96" stroke="#FF6B6B" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-                        <polygon points="-4,92 0,102 4,92" fill="#FF6B6B" opacity="0.4"/>
-                    </g>
-                    <!-- Return arrow (goes left on bottom belt back to start) -->
-                    <g transform="translate(50,233)">
-                        <polygon points="4,-4 -6,0 4,4" fill="var(--text-muted)" opacity="0.3"/>
-                    </g>
-                    <!-- Re-entry arrow (goes up from return belt to main belt) -->
-                    <g transform="translate(40,132)">
-                        <path d="M0,96 L0,0" stroke="var(--text-muted)" stroke-width="0.8" stroke-dasharray="4 3" opacity="0.3"/>
-                        <polygon points="-4,4 0,-6 4,4" fill="var(--text-muted)" opacity="0.3"/>
-                    </g>
-
-                    <!-- === PASS T-SHIRT #1 — starts white, turns green at scanner === -->
-                    <!-- JS-driven shirts: spawned dynamically by app.js -->
-                    <g id="conveyorShirts"></g>
-
-                    <!-- === EXIT DOOR (right side) === -->
-                    <g transform="translate(850,72)">
-                        <rect x="-14" y="-30" width="28" height="60" rx="3" fill="none" stroke="#00E5A0" stroke-width="1.2" opacity="0.5"/>
-                        <rect x="-10" y="-26" width="20" height="52" rx="2" fill="rgba(0,229,160,0.03)"/>
-                        <line x1="0" y1="-30" x2="0" y2="30" stroke="#00E5A0" stroke-width="0.5" stroke-dasharray="3 2" opacity="0.3"/>
-                        <text x="0" y="44" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="#00E5A0" letter-spacing="1" opacity="0.6">PACKING</text>
-                    </g>
-
-                    <!-- PASS badge -->
-                    <g transform="translate(720,60)">
-                        <rect x="-24" y="-11" width="48" height="22" rx="11" fill="rgba(0,229,160,0.08)" stroke="#00E5A0" stroke-width="1"/>
-                        <text x="0" y="4" text-anchor="middle" fill="#00E5A0" font-family="var(--font-mono)" font-size="9" font-weight="600">PASS</text>
-                    </g>
-                    <!-- FAIL badge -->
-                    <g transform="translate(580,172)">
-                        <rect x="-24" y="-11" width="48" height="22" rx="11" fill="rgba(255,107,107,0.06)" stroke="#FF6B6B" stroke-width="1" opacity="0.6"/>
-                        <text x="0" y="4" text-anchor="middle" fill="#FF6B6B" font-family="var(--font-mono)" font-size="9" font-weight="600" opacity="0.6">FAIL</text>
-                    </g>
-                    <!-- RETRY label on return belt -->
-                    <g transform="translate(300,250)">
-                        <text x="0" y="0" text-anchor="middle" font-family="var(--font-mono)" font-size="8" fill="var(--text-muted)" letter-spacing="2" opacity="0.3">← REWORK</text>
-                    </g>
-
-                    <!-- === MOTION PATHS === -->
-                    <!-- Pass path: enter left → scan → exit right -->
-                    <path id="passPath" d="M20,100 L850,100" fill="none" stroke="none"/>
-                    <!-- Fail loop: enter left → scan → drop down → go left on return belt → back up → re-enter -->
-                    <path id="failLoopPath" d="M20,100 L560,100 L560,230 L40,230 L40,100 L20,100" fill="none" stroke="none"/>
-                </svg>
+            <!-- Live Floor Model — Argus factory-floor animation -->
+            <div class="floor-viz" data-animate="fade-up">
+                <div class="floor-stats">
+                    <div class="floor-stat"><div class="v grad">6</div><div class="k">Lines</div></div>
+                    <div class="floor-stat"><div class="v grad">25<span class="u">s</span></div><div class="k">Cycle</div></div>
+                    <div class="floor-stat"><div class="v pass" id="floorPass">0</div><div class="k">Pass</div></div>
+                    <div class="floor-stat"><div class="v rework" id="floorRework">0</div><div class="k">Rework</div></div>
+                    <div class="floor-stat"><div class="v fail" id="floorFail">0</div><div class="k">Fail</div></div>
+                    <div class="floor-stat"><div class="v packed" id="floorPacked">0</div><div class="k">Packed · shipping</div></div>
+                </div>
+                <div class="floor-stage">
+                    <svg id="floorSvg" viewBox="0 0 1200 700" role="img" aria-label="Animated plan of a garment factory floor with six assembly lines and the Argus inspection system"></svg>
+                    <div class="floor-legend">
+                        <span class="grp">Flow</span>
+                        <span><i style="background:#7a8494"></i>Garment</span>
+                        <span><i style="background:var(--danger)"></i>Reject → rework</span>
+                        <span class="grp">Argus</span>
+                        <span><i class="cam" style="background:var(--accent)"></i>Defect camera</span>
+                        <span><i style="background:#33FFC0"></i>Scan head</span>
+                        <span><i style="background:#22c3e6"></i>Knowledge loop</span>
+                    </div>
+                </div>
             </div>
             <div class="solution-features">
                 <div class="solution-card" data-animate="fade-up">
@@ -634,5 +553,6 @@
     </script>
     <script src="pointcloud.js"></script>
     <script src="app.js"></script>
+    <script src="floor.js"></script>
 </body>
 </html>
