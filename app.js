@@ -300,7 +300,7 @@ function initScrollAnimations() {
             once: true,
             onEnter: () => {
                 gsap.fromTo(timerEl, { innerHTML: '0' }, {
-                    innerHTML: 3,
+                    innerHTML: 2,
                     duration: 1.5,
                     ease: 'power2.out',
                     snap: { innerHTML: 1 },
