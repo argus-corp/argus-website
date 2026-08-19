@@ -29,9 +29,9 @@ const LABX=ML-52, CHX=38, KLABX=16;
 
 const BANDS=[
  {k:"cut", label:"CUTTING",           h:48, gap:10, zone:"pre"},
- {k:"sew", label:"SEWING",            h:48, gap:10, zone:"pre"},
- {k:"link",label:"LINKING",           h:48, gap:10, zone:"pre"},
- {k:"asm", label:"ASSEMBLY",          h:48, gap:16, zone:"pre"},
+ {k:"sew", label:"ASSEMBLY PHASE 1",            h:48, gap:10, zone:"pre"},
+ {k:"link",label:"ASSEMBLY PHASE 2",           h:48, gap:10, zone:"pre"},
+ {k:"asm", label:"ASSEMBLY PHASE 3",          h:48, gap:16, zone:"pre"},
  {k:"def", label:"DEFECT DETECTION",  h:86, gap:10, zone:"argus", proc:"cam"},
  {k:"iron",label:"IRONING · STEAMING",h:86, gap:10, zone:"mid",  proc:"iron"},
  {k:"meas",label:"MEASUREMENTS",      h:92, gap:10, zone:"argus", proc:"meas"},
