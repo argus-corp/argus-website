@@ -10,7 +10,12 @@ const svg=document.getElementById("floorSvg");
 if(!svg) return;
 const el=(t,a={})=>{const e=document.createElementNS(NS,t);for(const k in a)if(a[k]!=null)e.setAttribute(k,a[k]);return e;};
 const add=(p,t,a)=>{const e=el(t,a);p.appendChild(e);return e;};
-const txt=(p,s,a)=>{const e=add(p,"text",a);e.textContent=s;return e;};
+const txt=(p,s,a)=>{const e=add(p,"text",a);
+  const lines=String(s).split("\n");
+  if(lines.length<2){e.textContent=s;return e;}
+  const lh=(parseFloat(a["font-size"])||10.5)*1.25;
+  lines.forEach((ln,i)=>add(e,"tspan",{x:a.x,dy:i?lh:-lh*(lines.length-1)/2}).textContent=ln.trim());
+  return e;};
 
 const C={pre:"#6a7280",preDim:"#525c6a",gar:"#8791a0",text2:"#a3aab6",muted:"#828a97",
   accent:"#00E5A0",accentL:"#33FFC0",accentD:"#00B880",blue:"#22c3e6",purple:"#6c63ff",
@@ -32,9 +37,9 @@ const BANDS=[
  {k:"sew", label:"ASSEMBLY PHASE 1",            h:48, gap:10, zone:"pre"},
  {k:"link",label:"ASSEMBLY PHASE 2",           h:48, gap:10, zone:"pre"},
  {k:"asm", label:"ASSEMBLY PHASE 3",          h:48, gap:16, zone:"pre"},
- {k:"def", label:"DEFECT DETECTION",  h:86, gap:10, zone:"argus", proc:"cam"},
+ {k:"def", label:"DEFECT DETECTION \n (D-CAMs - x6)",  h:86, gap:10, zone:"argus", proc:"cam"},
  {k:"iron",label:"IRONING · STEAMING",h:86, gap:10, zone:"mid",  proc:"iron"},
- {k:"meas",label:"MEASUREMENTS",      h:92, gap:10, zone:"argus", proc:"meas"},
+ {k:"meas",label:"MEASUREMENTS\n(M-CAM - x1)",     h:92, gap:10, zone:"argus", proc:"meas"},
  {k:"out", label:"PACKED · SHIPPED",  h:48, gap:0,  zone:"out"},
 ];
 (()=>{let y=MT;for(const b of BANDS){b.y0=y;b.y1=y+b.h;b.cyc=(b.y0+b.y1)/2;y=b.y1+b.gap;}})();
