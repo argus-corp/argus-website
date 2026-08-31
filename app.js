@@ -674,3 +674,23 @@ function initFutureParticles() {
         onLeaveBack: () => { isVisible = false; if (animId) cancelAnimationFrame(animId); },
     });
 }
+
+// ==================== TRACTION MARQUEES ====================
+// The CSS loop translates the track by -50%, so the item list has to appear
+// exactly twice for the seam to be invisible. Cloning here keeps index.html
+// listing each logo once.
+(function initMarquees() {
+    document.querySelectorAll('[data-marquee] .marquee-track').forEach((track) => {
+        const items = Array.from(track.children);
+        if (!items.length) return;
+
+        const clones = document.createDocumentFragment();
+        items.forEach((item) => {
+            const clone = item.cloneNode(true);
+            clone.setAttribute('aria-hidden', 'true');
+            clone.querySelectorAll('img').forEach((img) => img.setAttribute('alt', ''));
+            clones.appendChild(clone);
+        });
+        track.appendChild(clones);
+    });
+})();
