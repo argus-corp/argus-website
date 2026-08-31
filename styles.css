@@ -2197,3 +2197,146 @@ button {
         animation: none;
     }
 }
+
+/* ==================== TEAM ==================== */
+.team-headline {
+    max-width: 760px;
+    margin: 0 0 clamp(48px, 7vh, 80px);
+}
+
+.team-headline h3 {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 4.4vw, 3.2rem);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+}
+
+.team-headline p {
+    color: var(--text-secondary);
+    font-size: clamp(1rem, 1.6vw, 1.125rem);
+    line-height: 1.7;
+    max-width: 660px;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(24px, 3vw, 40px);
+}
+
+.team-card {
+    position: relative;
+    padding: 32px 24px 30px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: border-color 0.45s var(--ease-out-quart),
+                transform 0.45s var(--ease-out-quart),
+                background 0.45s var(--ease-out-quart);
+}
+
+.team-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--accent-glow-strong);
+    background: var(--surface-solid);
+}
+
+.team-avatar {
+    position: relative;
+    width: 116px;
+    height: 116px;
+    margin: 0 auto 22px;
+    border-radius: 50%;
+    overflow: hidden;
+    /* ring sits outside the clipped circle so it never crops the photo */
+    box-shadow: 0 0 0 1px var(--border-hover);
+    transition: box-shadow 0.45s var(--ease-out-quart);
+}
+
+.team-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    filter: grayscale(1) contrast(1.02);
+    transition: filter 0.5s var(--ease-out-quart), transform 0.6s var(--ease-out-quart);
+}
+
+.team-card:hover .team-avatar {
+    box-shadow: 0 0 0 1px var(--accent-dim),
+                0 0 24px var(--accent-glow);
+}
+
+.team-card:hover .team-avatar img {
+    filter: grayscale(0) contrast(1);
+    transform: scale(1.04);
+}
+
+.team-name {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+/* Reserve two lines so a role that wraps doesn't push its bio out of line
+   with the neighbouring cards. */
+.team-role {
+    display: block;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    line-height: 1.5;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent);
+    min-height: 3em;
+    margin-bottom: 12px;
+}
+
+.team-bio {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.65;
+    text-align: center;
+}
+
+.team-note {
+    max-width: 720px;
+    margin-top: clamp(36px, 5vh, 56px);
+    padding-left: 16px;
+    border-left: 2px solid var(--border-hover);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+
+@media (max-width: 900px) {
+    .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 520px) {
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .team-card {
+        padding: 28px 22px;
+    }
+}
+
+/* Manual line breaks in display headlines only help once there's width for them. */
+@media (max-width: 640px) {
+    .br-lg {
+        display: none;
+    }
+}
