@@ -109,15 +109,19 @@ gsap.registerPlugin(ScrollTrigger);
 
     // Mobile menu
     if (menuBtn && mobileMenu) {
+        const setMenu = (open) => {
+            menuBtn.classList.toggle('active', open);
+            mobileMenu.classList.toggle('active', open);
+            // Freeze the page behind the overlay while it is open. The root
+            // element is the scroll container here, so it needs the class.
+            document.documentElement.classList.toggle('menu-open', open);
+        };
+
         menuBtn.addEventListener('click', () => {
-            menuBtn.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
+            setMenu(!mobileMenu.classList.contains('active'));
         });
         mobileMenu.querySelectorAll('a').forEach(a => {
-            a.addEventListener('click', () => {
-                menuBtn.classList.remove('active');
-                mobileMenu.classList.remove('active');
-            });
+            a.addEventListener('click', () => setMenu(false));
         });
     }
 })();

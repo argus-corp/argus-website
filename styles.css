@@ -432,10 +432,32 @@ button {
     flex-direction: column;
     gap: clamp(10px, 1.8vh, 18px);
     text-align: center;
-    /* Safety net for short/landscape screens. */
+    /* Safety net for short/landscape screens: the list stays reachable, but the
+       scrollbar itself is chrome we don't want inside a full-screen menu. Hide
+       the bar, keep the scrolling. */
     max-height: 100%;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;              /* Firefox */
+    -ms-overflow-style: none;           /* legacy Edge */
     padding: 12px 0;
+}
+
+.mobile-menu-links::-webkit-scrollbar {
+    display: none;                      /* Chrome, Safari */
+}
+
+/* The page behind an open overlay should not scroll — that background scroll is
+   the other way a stray scrollbar turns up. Scoped to the breakpoint where the
+   menu button exists, so desktop never reflows. */
+/* The class goes on <html>, not just <body>: this page sets overflow-x on the
+   root, which makes <html> the scroll container, so body overflow no longer
+   propagates to the viewport and would leave the scrollbar in place. */
+@media (max-width: 768px) {
+    html.menu-open,
+    html.menu-open body {
+        overflow: hidden;
+    }
 }
 
 .mobile-link {
