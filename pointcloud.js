@@ -6,7 +6,6 @@
 (function () {
     'use strict';
 
-    var DATA_URL   = 'data/pointcloud.json';   // legacy fallback
     var META_URL   = 'data/cloud-meta.json';
     var CLOUD_FULL = 'data/cloud-full.bin';
     var CLOUD_LITE = 'data/cloud-lite.bin';
@@ -167,9 +166,9 @@
     }
 
     function loadData() {
-        // The original 22 MB JSON cost a long download plus a multi-second
-        // JSON.parse that blocks the main thread. Geometry now ships as raw
-        // Float32, and compact devices get a decimated set of it.
+        // Geometry ships as raw Float32 rather than JSON: no parse step, and a
+        // fifth of the bytes. Compact devices get a decimated set of it.
+        // Both files are built by tools/build_cloud.py.
         var compact  = isCompactDevice();
         var cloudUrl = compact ? CLOUD_LITE : CLOUD_FULL;
 
@@ -187,15 +186,8 @@
             data.pointCount = compact ? data.pointCountLite : data.pointCountFull;
             start(data);
         }).catch(function (err) {
-            console.warn('Binary cloud unavailable, falling back to JSON:', err);
-            setLoadingText('Loading point cloud…');
-            fetch(DATA_URL)
-                .then(function (r) { return r.json(); })
-                .then(start)
-                .catch(function (e) {
-                    console.error('Point cloud load failed:', e);
-                    setLoadingText('Could not load the point cloud.');
-                });
+            console.error('Point cloud load failed:', err);
+            setLoadingText('Could not load the point cloud.');
         });
     }
 

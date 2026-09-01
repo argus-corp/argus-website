@@ -16,3 +16,12 @@ content.md
 # OS files
 .DS_Store
 Thumbs.db
+
+# Intermediate point cloud (~22 MB). Built from the raw export by
+# preprocess.py, then converted to data/cloud-*.bin by tools/build_cloud.py.
+# Only the binaries are deployed.
+data/pointcloud.json
+
+# Contact sheets the site assets were cropped from — kept locally, not served.
+visitors.png
+assets/team.jpeg
