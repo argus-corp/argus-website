@@ -6,7 +6,10 @@
 (function () {
     'use strict';
 
-    var DATA_URL = 'data/pointcloud.json';
+    var DATA_URL   = 'data/pointcloud.json';   // legacy fallback
+    var META_URL   = 'data/cloud-meta.json';
+    var CLOUD_FULL = 'data/cloud-full.bin';
+    var CLOUD_LITE = 'data/cloud-lite.bin';
 
     /* ---- Measurement palette ---- */
     var MEAS_HEX = {
@@ -18,6 +21,21 @@
         'sleeve-left':     '#C77DFF',
         'sleeve-right':    '#C77DFF',
     };
+    /* Phones and tablets get the decimated cloud and cheaper render settings.
+       Desktop is untouched. */
+    function isCompactDevice() {
+        try {
+            return window.matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+        } catch (e) {
+            return window.innerWidth <= 900;
+        }
+    }
+
+    function setLoadingText(txt) {
+        var el = document.querySelector('#vizOverlay .viz-loading span');
+        if (el) el.textContent = txt;
+    }
+
     function measColor(name) { return new THREE.Color(MEAS_HEX[name] || '#00E5A0'); }
     function measHex(name)   { return MEAS_HEX[name] || '#00E5A0'; }
 
@@ -56,8 +74,16 @@
         );
         applyCam();
 
-        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        // MSAA over a few hundred thousand points is the single most expensive
+        // thing on a mobile GPU, and a capped ratio keeps the fill rate sane.
+        var compact = isCompactDevice();
+        renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            antialias: !compact,
+            alpha: true,
+            powerPreference: 'high-performance'
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, compact ? 1.5 : 2));
         renderer.setSize(wrap.clientWidth, wrap.clientHeight);
         renderer.setClearColor(0x000000, 0);
 
@@ -73,8 +99,33 @@
         tick();
     }
 
+    /* The 45° FOV is vertical, so a portrait viewport loses horizontal
+       coverage and the garment overflows the frame. Pull the camera back by
+       the shortfall so the fit matches what a landscape viewport shows. */
+    function aspectFit() {
+        if (!camera || !camera.aspect || camera.aspect >= 1) return 1;
+        return Math.min(1 / camera.aspect, 2.2);
+    }
+
+    /* Keep a label inside the canvas instead of letting it clip off the edge.
+       offsetWidth forces a synchronous reflow, so cache the box and re-measure
+       only when the text actually changes — not on every frame of the loop. */
+    function clampLabel(el, x, y) {
+        var key = el.textContent.length;
+        if (el._lblKey !== key) {
+            el._lblKey = key;
+            el._lblW = el.offsetWidth  || 80;
+            el._lblH = el.offsetHeight || 20;
+        }
+        var pad = 6, w = el._lblW, h = el._lblH;
+        var maxX = wrap.clientWidth  - w / 2 - pad;
+        var maxY = wrap.clientHeight - h / 2 - pad;
+        el.style.left = Math.max(w / 2 + pad, Math.min(x, maxX)) + 'px';
+        el.style.top  = Math.max(h / 2 + pad, Math.min(y, maxY)) + 'px';
+    }
+
     function applyCam() {
-        var r = sph.radius;
+        var r = sph.radius * aspectFit();
         camera.position.set(
             r * Math.sin(sph.phi) * Math.sin(sph.theta),
             r * Math.cos(sph.phi),
@@ -86,34 +137,89 @@
     /* ============================================================
        LOAD DATA
        ============================================================ */
+    /* Stream a binary buffer, reporting progress so a slow connection reads as
+       progress rather than as a hung spinner. */
+    function fetchBinary(url, onProgress) {
+        return fetch(url).then(function (r) {
+            if (!r.ok) throw new Error(url + ' -> ' + r.status);
+            var total = +(r.headers.get('Content-Length') || 0);
+            if (!r.body || !r.body.getReader || !total) return r.arrayBuffer();
+
+            var reader = r.body.getReader();
+            var chunks = [], received = 0;
+            return (function pump() {
+                return reader.read().then(function (res) {
+                    if (res.done) {
+                        var out = new Uint8Array(received), off = 0;
+                        for (var i = 0; i < chunks.length; i++) {
+                            out.set(chunks[i], off);
+                            off += chunks[i].length;
+                        }
+                        return out.buffer;
+                    }
+                    chunks.push(res.value);
+                    received += res.value.length;
+                    onProgress(received / total);
+                    return pump();
+                });
+            })();
+        });
+    }
+
     function loadData() {
-        fetch(DATA_URL)
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                allMeasurements = data.measurements || [];
-                zSpanMm = data.zSpanMm || 100;
+        // The original 22 MB JSON cost a long download plus a multi-second
+        // JSON.parse that blocks the main thread. Geometry now ships as raw
+        // Float32, and compact devices get a decimated set of it.
+        var compact  = isCompactDevice();
+        var cloudUrl = compact ? CLOUD_LITE : CLOUD_FULL;
 
-                buildCloud(data);
-                buildKeypoints(data);
-                buildMeasurements(data);
-                populateHUD(data.measurements);
-
-                var overlay = document.getElementById('vizOverlay');
-                if (overlay) overlay.classList.add('hidden');
-
-                setTimeout(function () {
-                    var hud = document.getElementById('vizHud');
-                    if (hud) hud.classList.add('visible');
-                }, 400);
-
-                // Start the simultaneous path animation after a short delay
-                setTimeout(function () {
-                    animateAllPaths();
-                }, 1000);
+        Promise.all([
+            fetch(META_URL).then(function (r) {
+                if (!r.ok) throw new Error('meta -> ' + r.status);
+                return r.json();
+            }),
+            fetchBinary(cloudUrl, function (p) {
+                setLoadingText('Loading point cloud… ' + Math.round(p * 100) + '%');
             })
-            .catch(function (err) {
-                console.error('Point cloud load failed:', err);
-            });
+        ]).then(function (parts) {
+            var data = parts[0];
+            data.points = new Float32Array(parts[1]);
+            data.pointCount = compact ? data.pointCountLite : data.pointCountFull;
+            start(data);
+        }).catch(function (err) {
+            console.warn('Binary cloud unavailable, falling back to JSON:', err);
+            setLoadingText('Loading point cloud…');
+            fetch(DATA_URL)
+                .then(function (r) { return r.json(); })
+                .then(start)
+                .catch(function (e) {
+                    console.error('Point cloud load failed:', e);
+                    setLoadingText('Could not load the point cloud.');
+                });
+        });
+    }
+
+    function start(data) {
+        allMeasurements = data.measurements || [];
+        zSpanMm = data.zSpanMm || 100;
+
+        buildCloud(data);
+        buildKeypoints(data);
+        buildMeasurements(data);
+        populateHUD(data.measurements);
+
+        var overlay = document.getElementById('vizOverlay');
+        if (overlay) overlay.classList.add('hidden');
+
+        setTimeout(function () {
+            var hud = document.getElementById('vizHud');
+            if (hud) hud.classList.add('visible');
+        }, 400);
+
+        // Start the simultaneous path animation after a short delay
+        setTimeout(function () {
+            animateAllPaths();
+        }, 1000);
     }
 
     /* ============================================================
@@ -472,8 +578,7 @@
 
             var hw = wrap.clientWidth / 2;
             var hh = wrap.clientHeight / 2;
-            el.style.left = (pos.x * hw + hw) + 'px';
-            el.style.top  = (-pos.y * hh + hh) + 'px';
+            clampLabel(el, pos.x * hw + hw, -pos.y * hh + hh);
             el.style.opacity = (m.tube.material.uniforms.uOpacity.value > 0) ? '0.9' : '0';
         });
     }
@@ -672,8 +777,9 @@
         var w = wrap.clientWidth, h = wrap.clientHeight;
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
+        applyCam();
         renderer.setSize(w, h);
-        if (cloud) cloud.material.uniforms.uPR.value = Math.min(window.devicePixelRatio, 2);
+        if (cloud) cloud.material.uniforms.uPR.value = Math.min(window.devicePixelRatio, isCompactDevice() ? 1.5 : 2);
     }
 
     /* ============================================================
@@ -699,8 +805,7 @@
                 fl.el.style.visibility = 'visible';
                 var hw = wrap.clientWidth / 2;
                 var hh = wrap.clientHeight / 2;
-                fl.el.style.left = (pos.x * hw + hw) + 'px';
-                fl.el.style.top  = (-pos.y * hh + hh) + 'px';
+                clampLabel(fl.el, pos.x * hw + hw, -pos.y * hh + hh);
             });
         }
 

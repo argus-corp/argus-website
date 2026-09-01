@@ -570,7 +570,10 @@ function animateCounter(el, target, duration = 2000) {
     const initial = 0;
 
     function step(timestamp) {
-        const progress = Math.min((timestamp - start) / duration, 1);
+        // rAF hands back the timestamp of the frame it is painting, which can
+        // predate the performance.now() taken when scheduling. Without the
+        // lower clamp that first frame yields a negative count.
+        const progress = Math.max(0, Math.min((timestamp - start) / duration, 1));
         // Ease out quart
         const ease = 1 - Math.pow(1 - progress, 4);
         const current = Math.round(initial + (target - initial) * ease);
@@ -693,4 +696,32 @@ function initFutureParticles() {
         });
         track.appendChild(clones);
     });
+})();
+
+// ==================== HERO REVEAL SAFETY NET ====================
+// The hero's opening state (logo strokes, headline, stats, CTA) is opacity:0 /
+// stroke-dashoffset in CSS, and only the GSAP intro timeline clears it. If GSAP
+// never arrives — blocked CDN, a dropped request on a flaky mobile connection —
+// the hero stays permanently blank. Reveal it unconditionally after a grace
+// period. When GSAP does run it has long finished by then, and these are the
+// same end values, so the net is inert in the normal case.
+(function initHeroRevealFallback() {
+    var revealed = false;
+
+    function reveal() {
+        if (revealed) return;
+        revealed = true;
+        document.querySelectorAll(
+            '.hero-logo-visual, .hero-badge, .hero-line-inner, .hero-sub, .hero-stats-row, .hero-cta'
+        ).forEach(function (el) {
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+        });
+        document.querySelectorAll('.logo-face, .logo-hex, .logo-text path').forEach(function (el) {
+            el.style.strokeDashoffset = '0';
+        });
+    }
+
+    if (typeof window.gsap === 'undefined') { reveal(); return; }
+    setTimeout(reveal, 5000);
 })();

@@ -1539,7 +1539,10 @@ button {
 
 .future-timeline-line {
     position: absolute;
-    left: 20px;
+    /* Markers sit in a 24px box starting at x=8, so their centre is x=20.
+       A 2px rule centres there at left:19 — the same at every breakpoint,
+       since the mobile padding and marker offset shift together. */
+    left: 19px;
     top: 0;
     bottom: 0;
     width: 2px;
@@ -1825,10 +1828,6 @@ button {
 @media (max-width: 640px) {
     .future-timeline {
         padding-left: 40px;
-    }
-
-    .future-timeline-line {
-        left: 10px;
     }
 
     .future-marker {
@@ -2347,3 +2346,200 @@ button {
         display: none;
     }
 }
+
+/* ================================================================
+   MOBILE REFINEMENTS
+   Phone-first corrections for the hero, the 3D viewer and the wide
+   floor diagram, which were all laid out for landscape space.
+   ================================================================ */
+
+/* 100vh on phones measures the viewport with the address bar retracted, so
+   the hero runs taller than what is actually on screen and pushes the CTA
+   below the fold. svh is the visible height. */
+@supports (min-height: 100svh) {
+    .hero {
+        min-height: 100svh;
+    }
+}
+
+/* The base rule nudges the mark 60px right so it overlaps the headline block
+   on desktop. Once the hero stacks, that nudge just throws it off-centre. */
+@media (max-width: 900px) {
+    .hero-logo-visual {
+        margin-right: 0;
+        align-self: center;
+    }
+}
+
+@media (max-width: 640px) {
+    /* 12vh top and bottom put ~200px of dead space between every section on a
+       phone. Tighter rhythm keeps the page scannable without changing desktop. */
+    :root {
+        --section-padding: clamp(52px, 7.5vh, 76px);
+    }
+
+    .section-header {
+        margin-bottom: 40px;
+        gap: 14px;
+    }
+
+    .future-timeline {
+        margin-bottom: 48px;
+    }
+
+    /* --- Hero --- */
+    .hero {
+        gap: 4px;
+    }
+
+    /* The mark was claiming ~60vw plus 100px of lead-in, which pushed the
+       headline off the first screen. */
+    .hero-logo-visual {
+        width: 200px;
+        max-width: 48vw;
+        padding-top: 76px;
+    }
+
+    .hero-content {
+        padding-top: 4px;
+    }
+
+    .hero-badge {
+        font-size: 11px;
+        padding: 6px 14px;
+    }
+
+    /* The 42px floor left "Quality Control for" one word too wide on a 360px
+       screen, orphaning "for" onto its own line. */
+    .hero-title {
+        font-size: clamp(34px, 9.5vw, 42px);
+        letter-spacing: -1.5px;
+    }
+
+    /* Equal columns keep the three figures aligned even when one label wraps
+       to two lines; the dividers stop earning their space at this width. */
+    .hero-stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        align-items: start;
+        gap: 10px;
+        margin-bottom: 34px;
+    }
+
+    .hero-stat-divider {
+        display: none;
+    }
+
+    .hero-stat-number {
+        font-size: 30px;
+    }
+
+    .hero-stat-prefix {
+        font-size: 20px;
+    }
+
+    .hero-stat-unit {
+        font-size: 14px;
+    }
+
+    .hero-stat-label {
+        font-size: 10px;
+        letter-spacing: 0.5px;
+    }
+
+    /* Equal halves: even widths, no pill jammed against the screen edge, and
+       far less vertical space than two full-width blocks. 44px tall is the
+       minimum comfortable touch target, so height comes from padding alone. */
+    .hero-cta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .hero-cta .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 13px 10px;
+        font-size: 13px;
+        gap: 6px;
+    }
+
+    /* Touch already implies scrolling, and the hint collides with a tall hero. */
+    .hero-scroll {
+        display: none;
+    }
+
+    /* --- Buttons elsewhere --- */
+    /* btn-lg was a separate, larger scale; on a phone that reads as oversized
+       next to the hero pair. Collapse the two scales into one. */
+    .btn {
+        padding: 13px 24px;
+        font-size: 13px;
+    }
+
+    .btn-lg {
+        padding: 14px 28px;
+        font-size: 14px;
+    }
+
+    .contact-cta .btn {
+        width: auto;
+        min-width: 200px;
+        justify-content: center;
+    }
+}
+
+/* --- 3D viewer --- */
+@media (max-width: 768px) {
+    .visualizer-canvas-wrap {
+        height: 62vh;
+        min-height: 380px;
+    }
+
+    /* At 220px min-width the panel covered most of a phone screen. Docked
+       full-width with the readings in two columns, it stays short. */
+    .viz-hud {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        min-width: 0;
+        padding: 10px 12px;
+        border-radius: 10px;
+    }
+
+    .viz-hud-title {
+        font-size: 10px;
+        margin-bottom: 8px;
+    }
+
+    .viz-hud-measurements {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 14px;
+    }
+
+    .viz-measurement-row {
+        padding: 3px 0;
+    }
+
+    .viz-measurement-name {
+        font-size: 10px;
+    }
+
+    .viz-measurement-value {
+        font-size: 11px;
+    }
+
+    .viz-controls {
+        bottom: 12px;
+        right: 12px;
+        gap: 6px;
+    }
+}
+
+/* --- Factory floor plan --- */
+/* Deliberately left to scale to fit rather than holding a fixed width behind a
+   horizontal scroll. SVG renders at device resolution, so at the 2-3x DPR of a
+   real phone the labels stay readable at fit-to-width — and a pannable region
+   inside a vertically scrolling page mostly goes undiscovered, leaving readers
+   with what looks like a cropped diagram. */
